@@ -85,6 +85,17 @@ mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86
 
 ---
 #Virtualisation
+##Libvirt
+Plusieurs technologies de virtualisation existent (KVM, Xen, VirtualBox, LXC...).
+
+Il est donc nécéssaire de créer une API pour abstaire ces technologies pour des applications de managment de VM. c'est le but du projet [libvirt](#https://libvirt.org/html/index.html)
+
+Libvirt permet de gérer ces VM et leur ecosystème (reseau, storage) en fournissant un API, exposable sur le réseau.
+
+Openstack ou d'autres outils de managment de VM peuvent alors utiliser cette API.
+
+---
+#Virtualisation
 ##Gestion des VM
 Grace a des logiciels dédiés (virt-manager/libvirt, Virtual-box, VMWare Player...) la gestion de ces VM est simplifiée.
 
@@ -131,13 +142,13 @@ Ces techniques de virtualistion sont utilisées depuis longtemps chez les gros h
 
 la légende :
 ```
-Amazon, dont le parc était sudimenssionné pour pouvoir répondre au pic 
+Amazon, dont le parc était sudimenssionné pour pouvoir répondre au pic
 d'audience de noel, se retrouvait avec des datacenter sous exploités
-tout le reste de l'année. 
-Il ont donc créé une offre publique de location de ses resource :
+tout le reste de l'année.
+Ils ont donc créé une offre publique de location de ses resources :
 c'est la naissance d'amazon EC2
 ```
-D'autres Cloud provider proposent des services accessibles à la demande, comme du storage et des software. Elles rencontres un grand succes et on parle alors de \*aaS.
+D'autres Cloud provider proposent des services accessibles à la demande, comme du storage et des software. Elles rencontrent un grand succes et on parle alors de \*aaS.
 
 ---
 #Virtualisation / \*aaS
@@ -194,7 +205,7 @@ Une autre initiative Opensource voit également le jour : Cloudstack. Menée par
 name: openstack
 #Openstack
 ##Introduction
-But : 
+But :
 - service de IaaS : découper un datacenter physique en datacenter virtuel, allouable à la demande, accesisble par des API Rest. (schéma DC virtuel sur DC phy)
 - devenir la plateforme de Cloud Computing de référence
 - pour les grand déploiments (CERN, Nectar...);
@@ -206,7 +217,11 @@ But :
 ---
 #Openstack
 ##Fondation
-- 4 open;
+- [4 open](#https://wiki.openstack.org/wiki/Open) :
+    -Open Source : no Open Core; no entreprise edition.
+    -Open Design : Design Summit tous les 6 mois;
+    -Open Development : public code reviews, public roadmaps;
+    -Open Community : meritocracy, élections des Leader par les developpeurs;
 - faire vivre la communaté; (communication)
 - s'assurer de l'intéropérabilité des API;
 - s'assurer de la qualité du code;
