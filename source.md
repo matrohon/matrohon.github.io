@@ -128,7 +128,11 @@ D'autres logiciels sont orientés vers la gestion de parc et d'hote de VM : Prox
 
 Ils permettent de rationnaliser davantage la gestion du parc de VM en les placant de manière optimisée en fonction de leur contraintes.
 
-Une pratique consiste souvent à généraliser l'over-subscription : l'admin fait le pari que les VM ne consommeront pas les resources qui lui sont allouées. Il va donc faire en sorte qu'elles soient davantage partagée que ce qui est demandée par les clients.
+Quelques pratiques communes pour l'optimisation de l'utilisation des resources du DC :
+
+- over-subscrition : le nombre de vCPU du total des VM placé sur l'hyperviseur est supérieur au nombre de CPU de l'hyperviseur;
+- ballooning : autoriser les VM a dépasser la mémoire allouée pendant un bref instant;
+- deduplication : copy-on-write sur les disques (ex QCOW2);
 
 Si le nombre de resources vient a manquer, on peut toujours ajouter un serveur physique au cluster, et migrer à chaud (live-migrate) les VM qui en ont besoin. De même, les nouvelles VM seront programmées (schedulées) sur ce nouveau serveur.
 
@@ -218,10 +222,10 @@ But :
 #Openstack
 ##Fondation
 - [4 open](#https://wiki.openstack.org/wiki/Open) :
-    -Open Source : no Open Core; no entreprise edition.
-    -Open Design : Design Summit tous les 6 mois;
-    -Open Development : public code reviews, public roadmaps;
-    -Open Community : meritocracy, élections des Leader par les developpeurs;
+    - Open Source : no Open Core; no entreprise edition.
+    - Open Design : Design Summit tous les 6 mois;
+    - Open Development : public code reviews, public roadmaps;
+    - Open Community : meritocracy, élections des Leader par les developpeurs;
 - faire vivre la communaté; (communication)
 - s'assurer de l'intéropérabilité des API;
 - s'assurer de la qualité du code;
@@ -260,7 +264,7 @@ source : [activity.openstack.org](#http://activity.openstack.org/dash/browser/)
 Openstack est composé de plusieurs services ayant en commun :
 - l'apport d'une API REST (souvent calquée et compatible EC2);
 - une architecture modulaire;
-- une implémentation opensource de référence : 
+- une implémentation opensource de référence :
     - dans l'ADN d'openstack;
     - nécécaire pour les tests fonctionnels automatisés;
 
@@ -276,11 +280,47 @@ Openstack est composé de plusieurs services ayant en commun :
 #Openstack
 ##Communauté
 - Summit : 2 fois par an (+Midcycle)
-- Mailing List;
+- Mailing List : openstack; openstack-dev; openstack-operator....
 - IRC : un chan par projet;
-- réunoin hebdo ar projet et par sous-projet;
-- ask.openstack.org
+- réunion hebdo par projet et par sous-projet;
+- ask.openstack.org;
 ---
+#Openstack
+##Mutliples composants
+
+Chaque composant va fournir :
+- des resources as a service(compute, storage, networks...);
+- une API;
+- une base de données dédiée;
+- un projet (dev/roadmap..) dédié;
+
+Les composants de base : 
+- Keystone : gestion d'identité, et catalogue de service;
+- Glance : gestion des images utilisées pour lancer une VM;
+- Nova : gestion des VM;
+
+Les composant additionnels : 
+- Cinder : gestion des volume (disque dur, mode block) attaché à chaque VM:
+- Neutron : gestion du réseaux et des ports de VMs;
+- Horizon : interface graphique;
+- Heat : Orchestartion de VM;
+- Swift : gestion de stockage (mode fichier)
+
+et bien d'autres...
+---
+#Openstack
+##Architecture Simplifiée
+
+http://git.openstack.org/cgit/openstack/operations-guide/plain/doc/openstack-ops/figures/osog_0001.png
+---
+#Openstack
+##Architecture Operationnelle
+
+<img src="http://git.openstack.org/cgit/openstack/operations-guide/plain/doc/openstack-ops/figures/osog_0001.png" style="width: 500px;"/>
+
+
+
+
 ##Keystone
 
 ---
