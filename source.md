@@ -3,6 +3,25 @@ class: center, middle
 # Cours Openstack 2016
 
 ---
+#Présentation
+Mathieu Rohon
+
+OrangeLabs
+
+Contributeur Openstack depuis 2012
+
+Principale actvité : Openstack/Neutron
+
+---
+# Scope du cours
+
+- Virtualisation
+- Cloud Computing/IaaS
+- Datacenter Virtuel
+- __Opensource__
+- __Openstack__
+
+---
 name: agenda
 # Agenda
 
@@ -17,57 +36,81 @@ name: agenda
 1. Heat
 1. CI/CD Openstack
 
-
 ---
 name: virtualisation
-#Virtualisation
-##Rationnaliser l'IT
-Pour assurer son bon fonctionnement, chaque application doit maitriser son environnement d'exécution (OS/Librairies).
+#La machine virtuelle (VM)
 
-Sans virtualisation chaque application nécéssite son serveur dédié.
+- Un système d'exploitation (OS) tournant comme un simple logiciel;
+- l'OS n'a pas conscience d'être virtualisé par un autre OS;
+- on parlera de __GUEST__ ou de __VM__ pour l'OS virtuel, et de __HYPREVISEUR__ ou de __HOST__ pour le système sous-jacent;
+- la comminication inter-VM se fait __exclusivement par le réseau__, même si les VMs sont sur le même HOST;
+- les VMs sont __isolées du host__ et n'ont donc pas accès au matériel;
+- nécéssite d'émuler le matériel (CPU/RAM/IO/GPU)
 
-- demander au service IT l'achat d'un serveur dédié;
-- demander au service Réseau un port/VLan dédié;
-- environnement contraint, peu flexible;
-- on finit souvent par avoir un serveur surdimensionné (CPU/RAM/Disk) :
+<p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Diagramme_ArchiEmulateur.png" width="400px"/></p>
 
-    - volontairement : pour ne pas avoir à le modifier en cas de forte charge de l'application;
+---
+#L'hyperviseur
+L'hyperviseur a pour rôle de gérer les VMs et d'émuler les accès des VMs au matériel.
 
-    - involontairement : on utilise le matériel sourcé par le département IT, qui ne correspond pas forcément à mon besoin (trop de CPU/RAM/Disk)
+Historiquement, il existe 2 types d'hyperviseurs : 
+- type 1 : l'hyperviseur est à la place de l'OS (VMWare ESXi, XEN)
+- type 2 : l'hyperviseur tourne comme un logiciel sur un OS existant (VirtualBox, QEMU)
+
+<p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Hyperviseur.png" width="400px"/></p>
+
+- type hybride : l'hyperviseur tourne dans le noyau (module linux) de l'OS existant (kvm)
+---
+#L'émulation
+
+La solution basique pour créer une VM consiste donc à émuler son matériel :
+
+- Solution opensource : __Qemu__
+- Avantage :
+    - Permet de faire tourner du matériel différent dans la VM de celui présent sur le HOST (ex CPU ARM sur x86)
+- Inconvénient :
+    - __très couteuse en CPU__
+    - toutes les instructions CPU doivent êter réinterpretées
+
+---
+#L'émulation iso-matériel
 
 
-Les datacenter deviennent alors une collection de serveur sous-exploités!!
+Mais dans le CLoud Computing ce qui va nous intéresse c'est d'isoler les VMs, et non d'émuler du matériel.
+
+
+Si ma VM connait le matériel du HOST, je n'ai plus les problèmes de performance?
+
+---
+#L'émulation iso-matériel
+
+Malheureusement __non__ :
+- l'OS du HOST cherche a executer des instructions privilégiées sur le CPU (protected mode, Ring 0), mais n'y est pas authorisé en tant que logiciel (Ring 3)
+
+<p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Priv_rings.svg/633px-Priv_rings.svg.png" width="300px;"/></p>
+- Pas d'accès direct au matériel donc :
+    - Pas d'accès performant à la RAM (chipset MMU): nécéssite l'émulation de ce chipset par le HOST
+    - Pas d'accès performant (DMA) aux équipements d'entée/sortie (disque, carte réseau...)
+
+---
+#L'émulation iso-matériel aidée
+
+La paravirtualisation (Xen):
+- les Guests sont au courant qu'ils sont virtualisés;
+- au lieu d'appeler les instructions couteuses à émuler, il vont demander à l'Hyperviseur de les executer à leur place;
+- VirtualBox guest additions?
+
+Les améliorations matérielles :
+- Intel VT-x / AMD-V / VIA VT : authoriser les VMs à exécuter les instructions privilégiées;
+- Intel EPT / AMD RVI : authorise les VMs à acceder directement à la MMU;
+- Intel VT-d / AMD-Vi : permet l'accès des VMs au DMA et redirige les intérruptions : on peut assigner un périphérique PCI à une VM;
+- SRIOV : carte PCI-Express pouvant être divisée; chaque partie peut alors être affectée à un VMs;
+
+Ces améliorations matérielles sont nativement intégrées dans les équipements récents (à activer dans le BIOS) et les hyperviseurs savent en tirer partie, ce qui rend la virtualisation __beaucoup moins couteuse en CPU__
 
 ---
 #Virtualisation
-##Rationnaliser l'IT
-Au lieu d'avoir un serveur physique par application, on va virtualiser les resources d'un serveur pour mutualiser les coûts, mais en gardant la segmentation logicielle.
-
-On obtient ainsi des Machines Virtuelles (VM):
-- n'ayant accès qu'a une partie des resources (2 cpu sur 16, 2 Go de RAM /16Go, un disk de 20Go sur les 500Go dispo...)
-- mais ayant une son propre environnement d'exécution (OS/Librairies)
-
----
-#Virtualisation
-##Technologies de virtualisation
-
-Il faut donc diviser les resources physiques et ordonnancer leur acces entre chaque VM.
-- l'odonnancement est gérée par l'hyperviseur; (KVM, Xen, ESXi...)
-- l'émulation est gérée par l'émulateur :); (Qemu...)
-
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Diagramme_ArchiEmulateur.png" style="width: 500px;"/>
-[//]: # (![](https://upload.wikimedia.org/wikipedia/commons/5/5c/Diagramme_ArchiEmulateur.png))
-
----
-#Virtualisation
-##Technologies de virtualisation
-L'émulation peut être très couteuse en CPU lorsqu'il s'agit d'émuler un équipement différent de l'équipement physique sous-jacent (par exemple CPU ARM sur x86).
-
-Mais, dans le monde cloud, on cherche surtout à diviser les équipements phyisques, sans compromettre l'étanchéité entre les VM. Les équipementier ont améliorer leur matériels jour pour optimiser le partage d'équipements physiques dans ce sens (Intel VT, AMD-V). Ainsi le surcoût de la virtualisation est acceptable.
-
----
-#Virtualisation
-##Gérer ses VM
+##Créer ses VMs
 On peut directement le faire avec kvm :
 ```basch
 #qemu-img create -f qcow2 /tmp/img.qcow2 6G
@@ -88,7 +131,7 @@ mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86
 ##Libvirt
 Plusieurs technologies de virtualisation existent (KVM, Xen, VirtualBox, LXC...).
 
-Il est donc nécéssaire de créer une API pour abstaire ces technologies pour des applications de managment de VM. c'est le but du projet [libvirt](#https://libvirt.org/html/index.html)
+Il est donc nécéssaire de créer une API pour abstraire ces technologies pour des applications de managment de VM. c'est le but du projet [libvirt](#https://libvirt.org/html/index.html)
 
 Libvirt permet de gérer ces VM et leur ecosystème (reseau, storage) en fournissant un API, exposable sur le réseau.
 
@@ -137,6 +180,37 @@ Quelques pratiques communes pour l'optimisation de l'utilisation des resources d
 Si le nombre de resources vient a manquer, on peut toujours ajouter un serveur physique au cluster, et migrer à chaud (live-migrate) les VM qui en ont besoin. De même, les nouvelles VM seront programmées (schedulées) sur ce nouveau serveur.
 
 Les resources physiques ne sont donc plus dédiées à un projet mais mutualisées pour plusieurs projets dans des DataCenter (DC) distants. C'est l'émergence du __Cloud Computing__
+
+---
+name: virtualisation
+#Virtualisation
+##Rationnaliser l'IT
+Pour assurer son bon fonctionnement, chaque application doit maitriser son environnement d'exécution (OS/Librairies).
+
+Sans virtualisation chaque application nécéssite son serveur dédié.
+
+- demander au service IT l'achat d'un serveur dédié;
+- demander au service Réseau un port/VLan dédié;
+- environnement contraint, peu flexible;
+- on finit souvent par avoir un serveur surdimensionné (CPU/RAM/Disk) :
+
+    - volontairement : pour ne pas avoir à le modifier en cas de forte charge de l'application;
+
+    - involontairement : on utilise le matériel sourcé par le département IT, qui ne correspond pas forcément à mon besoin (trop de CPU/RAM/Disk)
+
+
+Les datacenter deviennent alors une collection de serveur sous-exploités!!
+
+---
+#Virtualisation
+##Rationnaliser l'IT
+Au lieu d'avoir un serveur physique par application, on va virtualiser les resources d'un serveur pour mutualiser les coûts, mais en gardant la segmentation logicielle.
+
+On obtient ainsi des VMs:
+- n'ayant accès qu'a une partie des resources (2 cpu sur 16, 2 Go de RAM /16Go, un disk de 20Go sur les 500Go dispo...)
+- mais ayant une son propre environnement d'exécution (OS/Librairies)
+
+La virtualisation a donc rapidement été adoptée dans les département IT des entreprises pour son __optimisation__ des resources et pour sa __flexibilité__.
 
 ---
 #Virtualisation
