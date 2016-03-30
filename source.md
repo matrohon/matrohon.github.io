@@ -97,9 +97,14 @@ Malheureusement __non__ :
 
 La paravirtualisation (Xen):
 - les Guests sont au courant qu'ils sont virtualisés;
-- au lieu d'appeler les instructions couteuses à émuler, il vont demander à l'Hyperviseur de les executer à leur place;
+- au lieu d'appeler les instructions couteuses à émuler, ils vont demander à l'Hyperviseur de les executer à leur place;
 - VirtualBox guest additions?
 
+
+<p style="text-align:center;"><img src="http://www.ibm.com/developerworks/library/l-virtio/figure1.gif" width="600px;"/></p>
+
+---
+#L'émulation iso-matériel aidée
 Les améliorations matérielles :
 - Intel VT-x / AMD-V / VIA VT : authoriser les VMs à exécuter les instructions privilégiées;
 - Intel EPT / AMD RVI : authorise les VMs à acceder directement à la MMU;
@@ -119,7 +124,9 @@ Formatting '/tmp/img.qcow2', fmt=qcow2 size=6442450944 encryption=off cluster_si
 ```
 
 --
-<img src="./img/kvm.png" style="width: 400px;"/>
+count: false
+
+<p style="text-align:center;"><img src="./img/kvm.png" style="width: 400px;"/></p>
 
 ```basch
 #ps -aux | grep kvm
@@ -139,45 +146,47 @@ Openstack ou d'autres outils de managment de VM peuvent alors utiliser cette API
 
 ---
 #Virtualisation
-##Gestion des VM
-Grace a des logiciels dédiés (virt-manager/libvirt, Virtual-box, VMWare Player...) la gestion de ces VM est simplifiée.
+##Gestion des VMs
+Grace a des logiciels dédiés (virt-manager/libvirt, Virtual-box, VMWare Player...) la gestion de ces VMs est simplifiée.
 
 On peut rapidement créer une VM pour tester une nouvelle application sans compromettre l'hote. C'est très utile dans plusieurs cas :
 - faire tourner des services linux sous Windows/Mac;
 - installer des logiciels suspects;
-- tester des applications dans compromettre son environnement;
+- tester des applications sans compromettre son environnement;
 
 --
-<img src="./img/virt-manager.png" style="width: 400px;"/>
+count: false
+
+<p style="text-align:center;"><img src="./img/virt-manager.png" style="width: 400px;"/></p>
 
 ---
 #Virtualisation
-##Gestion des VM
+##Gestion des VMs
 Souvent, des TP d'applicatifs sont menés à partir de VM préconfigurées, incluant l'application installée sur la VM.
 
 Ainsi on évite toute la partie configuration de l'application (plus pour l'admin) pour se concentrer sur son utilisation, toute en ayant une application par étudiant.
 
 Pour cela l'outil plébiscité semble être Vagrant.
 Chaque étudiant se verra remettre :
-- un fichier descriptif de la (de) VM;
+- un fichier descriptif de la (des) VM;
 - un fichier servant de disque pour la (les) VM;
 
-Vagrant utilisera alors VirtualBox (ou Libvirt via plugin dedié) pour booter ses VM telles qu'elles ont été définies dans le fichier descriptif.
+Vagrant utilisera alors VirtualBox (ou Libvirt via plugin dedié) pour booter ses VMs telles qu'elles ont été définies dans le fichier descriptif.
 
 ---
 #Virtualisation
-##Gestion des VM
-D'autres logiciels sont orientés vers la gestion de parc et d'hote de VM : Proxmox, OVirt(libvirt).
+##Gestion des VMs
+D'autres logiciels sont orientés vers la gestion de parc et d'hote de VMs : Proxmox, OVirt(libvirt).
 
-Ils permettent de rationnaliser davantage la gestion du parc de VM en les placant de manière optimisée en fonction de leur contraintes.
+Ils permettent de rationnaliser davantage la gestion du parc de VMs en les placant de manière optimisée en fonction de leur contraintes.
 
 Quelques pratiques communes pour l'optimisation de l'utilisation des resources du DC :
 
-- over-subscrition : le nombre de vCPU du total des VM placé sur l'hyperviseur est supérieur au nombre de CPU de l'hyperviseur;
-- ballooning : autoriser les VM a dépasser la mémoire allouée pendant un bref instant;
-- deduplication : copy-on-write sur les disques (ex QCOW2);
+- over-subscrition : le nombre de vCPU du total des VMs placée sur l'hyperviseur est supérieur au nombre de CPUs de l'hyperviseur;
+- ballooning : autoriser les VMs a dépasser la mémoire allouée pendant un bref instant;
+- copy-on-write sur les disques (ex QCOW2);
 
-Si le nombre de resources vient a manquer, on peut toujours ajouter un serveur physique au cluster, et migrer à chaud (live-migrate) les VM qui en ont besoin. De même, les nouvelles VM seront programmées (schedulées) sur ce nouveau serveur.
+Si le nombre de resources vient a manquer, on peut toujours ajouter un serveur physique au cluster, et migrer à chaud (live-migrate) les VMs qui en ont besoin. De même, les nouvelles VMs seront programmées (schedulées) sur ce nouveau serveur.
 
 Les resources physiques ne sont donc plus dédiées à un projet mais mutualisées pour plusieurs projets dans des DataCenter (DC) distants. C'est l'émergence du __Cloud Computing__
 
@@ -198,8 +207,7 @@ Sans virtualisation chaque application nécéssite son serveur dédié.
 
     - involontairement : on utilise le matériel sourcé par le département IT, qui ne correspond pas forcément à mon besoin (trop de CPU/RAM/Disk)
 
-
-Les datacenter deviennent alors une collection de serveur sous-exploités!!
+Les datacenter deviennent alors une collection de serveurs sous-exploités!!
 
 ---
 #Virtualisation
@@ -284,8 +292,8 @@ name: openstack
 #Openstack
 ##Introduction
 But :
-- service de IaaS : découper un datacenter physique en datacenter virtuel, allouable à la demande, accesisble par des API Rest. (schéma DC virtuel sur DC phy)
-- devenir la plateforme de Cloud Computing de référence
+- service de IaaS : découper un datacenter physique en datacenters virtuels, allouables à la demande, accessible par des API REST;
+- devenir la plateforme de Cloud Computing de référence;
 - pour les grand déploiments (CERN, Nectar...);
 - pour le cloud privé et public;
 - Interopérabilité des APIs;
@@ -307,10 +315,23 @@ But :
 
 ---
 #Openstack
-##Managment
+##Management
+- Membres individuels : tous les developpeurs et autres...
+- [Entreprises](#http://www.openstack.org/foundation/companies/)
+    - Platinium, Gold, Corporate
+- Board of directors : 
+    - gère la fondation (budget, marque, etc...)
+    - Platinium Directors (1 par membre platinium)
+    - Gold Directors élus par les membres Gold
+    - Individual Directors élus par les membres individuels
 - Technical committee
+    - membres élus par les développeurs
+    - gère la cohérence technique d'Openstack 
 - User committee
-...
+    - membres individuels élus
+    - representent les utilisateurs
+
+source : [openstack.org](#http://www.openstack.org/legal/bylaws-of-the-openstack-foundation/)
 
 ---
 #Openstack
@@ -332,17 +353,7 @@ source : [activity.openstack.org](#http://activity.openstack.org/dash/browser/)
 - avec un grande couverture de tests unitaires et fonctionnels;
 - sous licence Apache 2.0
     - modifiable et redistribuable;
----
-#Openstack
-##Le code
-Openstack est composé de plusieurs services ayant en commun :
-- l'apport d'une API REST (souvent calquée et compatible EC2);
-- une architecture modulaire;
-- une implémentation opensource de référence :
-    - dans l'ADN d'openstack;
-    - nécécaire pour les tests fonctionnels automatisés;
 
-(schéma modularité...)
 
 ---
 #Openstack
@@ -363,66 +374,108 @@ Openstack est composé de plusieurs services ayant en commun :
 ##Mutliples composants
 
 Chaque composant va fournir :
+- un projet (dev/roadmap/git..) dédié (launchpad/git/gerrit);
 - des resources as a service(compute, storage, networks...);
-- une API;
+- une [API REST] (#https://en.wikipedia.org/wiki/Representational_state_transfer) (souvent calquée et compatible EC2);
 - une base de données dédiée;
-- un projet (dev/roadmap..) dédié;
+- une architecture modulaire;
+- une implémentation opensource de référence :
+    - dans l'ADN d'openstack;
+    - nécécaire pour les tests fonctionnels automatisés;
+---
+#Openstack
+##Architecture d'un composant
+<p style="text-align:center;"><img src="./img/OpenstackProjectDesign.png" style="width: 500px;"/></p>
 
+---
+#Openstack
+##Architecture nova/libvirt/kvm/mariadb :
+<p style="text-align:center;"><img src="./img/OpenstackProjectDesign_libvirt.png" style="width: 500px;"/></p>
+
+---
+#Openstack
+##Architecture nova/VMWare/postgre :
+<p style="text-align:center;"><img src="./img/OpenstackProjectDesign_vmware.png" style="width: 500px;"/></p>
+
+
+
+---
+#Openstack
+##Mutliples composants
 Les composants de base : 
 - Keystone : gestion d'identité, et catalogue de service;
 - Glance : gestion des images utilisées pour lancer une VM;
 - Nova : gestion des VM;
 
-Les composant additionnels : 
+Les composants additionnels : 
 - Cinder : gestion des volume (disque dur, mode block) attaché à chaque VM:
 - Neutron : gestion du réseaux et des ports de VMs;
 - Horizon : interface graphique;
 - Heat : Orchestartion de VM;
 - Swift : gestion de stockage (mode fichier)
 
-et bien d'autres...
+et [bien d'autres](#http://governance.openstack.org/reference/projects/index.html)...
+
+---
+#Openstack
+##Mutliples composants
+
+Historiquement les projet openstack se divisant entre : 
+- integrated
+- incubated
+- stackforge
+
+Il devenait trop difficile de déterminer quelles projets devait être "integrated", alors Openstack est passé en mode BigTent :
+
+- Tous projets relatifs à Openstack et respectant les 4 open peut devenir un projet openstack officiel;
+- La notion de DefCore persiste : éléments indispensable d'un cloud Openstack (nova, glance, keystone...);
+
 ---
 #Openstack
 ##Architecture Simplifiée
 
-http://git.openstack.org/cgit/openstack/operations-guide/plain/doc/openstack-ops/figures/osog_0001.png
+<p style="text-align:center;"><img src="http://docs.openstack.org/juno/install-guide/install/apt/content/figures/1/a/common/figures/openstack_havana_conceptual_arch.png" style="width: 500px;"/></p>
 ---
 #Openstack
 ##Architecture Operationnelle
 
-<img src="http://git.openstack.org/cgit/openstack/operations-guide/plain/doc/openstack-ops/figures/osog_0001.png" style="width: 500px;"/>
+<p style="text-align:center;"><img src="http://git.openstack.org/cgit/openstack/operations-guide/plain/doc/openstack-ops/figures/osog_0001.png" style="width: 600px;"/></p>
+
+---
+#Openstack
+##Concept de base
 
 
-
-
+---
+#Openstack
 ##Keystone
 
 ---
-
+#Openstack
 ##Glance
 
 ---
-
+#Openstack
 ##Nova
 
 ---
-
+#Openstack
 ##Neutron
 
 ---
-
+#Openstack
 ##Cinder
 
 ---
-
+#Openstack
 ##Swift
 
 ---
-
+#Openstack
 ##Horizon
 
 ---
-
+#Openstack
 ##Heat
 
 
