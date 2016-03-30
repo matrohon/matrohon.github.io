@@ -303,7 +303,7 @@ But :
 ---
 #Openstack
 ##Fondation
-- [4 open](#https://wiki.openstack.org/wiki/Open) :
+- [4 open](https://wiki.openstack.org/wiki/Open) :
     - Open Source : no Open Core; no entreprise edition.
     - Open Design : Design Summit tous les 6 mois;
     - Open Development : public code reviews, public roadmaps;
@@ -317,7 +317,7 @@ But :
 #Openstack
 ##Management
 - Membres individuels : tous les developpeurs et autres...
-- [Entreprises](#http://www.openstack.org/foundation/companies/)
+- [Entreprises](http://www.openstack.org/foundation/companies/)
     - Platinium, Gold, Corporate
 - Board of directors : 
     - gère la fondation (budget, marque, etc...)
@@ -331,7 +331,7 @@ But :
     - membres individuels élus
     - representent les utilisateurs
 
-source : [openstack.org](#http://www.openstack.org/legal/bylaws-of-the-openstack-foundation/)
+source : [openstack.org](http://www.openstack.org/legal/bylaws-of-the-openstack-foundation/)
 
 ---
 #Openstack
@@ -340,8 +340,8 @@ Openstack en chiffres :
 - +5000 contributeurs;
 - ~300 company ont proposés des commits;
 - ~1600 commit par mois;
-source : [stackalitics.com](#www.stackalitics.com)
-source : [activity.openstack.org](#http://activity.openstack.org/dash/browser/)
+source : [stackalitics.com](www.stackalitics.com)
+source : [activity.openstack.org](http://activity.openstack.org/dash/browser/)
 
 ---
 #Openstack
@@ -376,7 +376,7 @@ source : [activity.openstack.org](#http://activity.openstack.org/dash/browser/)
 Chaque composant va fournir :
 - un projet (dev/roadmap/git..) dédié (launchpad/git/gerrit);
 - des resources as a service(compute, storage, networks...);
-- une [API REST] (#https://en.wikipedia.org/wiki/Representational_state_transfer) (souvent calquée et compatible EC2);
+- une [API REST] (https://en.wikipedia.org/wiki/Representational_state_transfer) (souvent calquée et compatible EC2);
 - une base de données dédiée;
 - une architecture modulaire;
 - une implémentation opensource de référence :
@@ -414,7 +414,7 @@ Les composants additionnels :
 - Heat : Orchestartion de VM;
 - Swift : gestion de stockage (mode fichier)
 
-et [bien d'autres](#http://governance.openstack.org/reference/projects/index.html)...
+et [bien d'autres](http://governance.openstack.org/reference/projects/index.html)...
 
 ---
 #Openstack
@@ -425,9 +425,9 @@ Historiquement les projet openstack se divisant entre :
 - incubated
 - stackforge
 
-Il devenait trop difficile de déterminer quelles projets devait être "integrated", alors Openstack est passé en mode BigTent :
+Il devenait trop difficile de déterminer quels projets devaient être "integrated", alors Openstack est passé en mode BigTent :
 
-- Tous projets relatifs à Openstack et respectant les 4 open peut devenir un projet openstack officiel;
+- Tous projets relatifs à Openstack et respectant les 4 open peuvent devenir un projet openstack officiel;
 - La notion de DefCore persiste : éléments indispensable d'un cloud Openstack (nova, glance, keystone...);
 
 ---
