@@ -138,7 +138,7 @@ mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86
 ##Libvirt
 Plusieurs technologies de virtualisation existent (KVM, Xen, VirtualBox, LXC...).
 
-Il est donc nécéssaire de créer une API pour abstraire ces technologies pour des applications de managment de VM. c'est le but du projet [libvirt](#https://libvirt.org/html/index.html)
+Il est donc nécéssaire de créer une API pour abstraire ces technologies pour des applications de managment de VM. c'est le but du projet [libvirt](https://libvirt.org/html/index.html)
 
 Libvirt permet de gérer ces VM et leur ecosystème (reseau, storage) en fournissant un API, exposable sur le réseau.
 
