@@ -443,16 +443,191 @@ Il devenait trop difficile de déterminer quels projets devaient être "integrat
 
 ---
 #Openstack
-##Concept de base
+##Keystone
+
+Keystone est l'une des brique de base d'openstack, et est indispensable à son fonctionnement;
+
+Keystone est accessible par API : 
+- API admin : port 35357;
+- API user : port 5000;
+
+Keystone gère : 
+- la liste des utilisateurs;
+- la liste des tenants/projets;
+- la liste des roles;
+- la correspondance entre les rôles<->utilisateurs<->tenants
+- l'authentification des utilisateurs par attribution de token;
+- le catalogue des service Openstack;
 
 
+---
+#Openstack
+##Keystone 
+
+La notion de __tenant__ (aussi appelé __projet__), __user__, __role__ :
+- un tenant ou projet, est une organisation à laquelle sont allouées des resources physiques du cloud (CPU/RAM/Disk...);
+- chaque utilisateur appartient à un tenant;
+- pour s'identifier sur un cloud openstack, un user utilisera le couple user/tenant;
+- un utilisateur peut appartenir à plusieurs tenant;
+- lorsqu'un utilisateur créé une resource (ex. une VM), il la créé pour le compte d'un tenant;
+- chaque utilisateur à un rôle dans chacun de ses tenants (admin/member...);
+
+---
+#Openstack
+##Keystone 
+
+```basch
+$ openstack project list
++----------------------------------+--------------------+
+| ID                               | Name               |
++----------------------------------+--------------------+
+| 1484c557018b49a4acd6e4e331e3bc55 | service            |
+| 3ae93431f89941bea16f92346471be11 | alt_demo           |
+| 80d01fa581d041d9bfa1770a5ae09ad9 | admin              |
+| cbf2d14974b64205824d121f5b38c525 | invisible_to_admin |
+| de060cd2e96e4b1abdeb34b4cf1a121e | demo               |
++----------------------------------+--------------------+
+
+$ openstack user list
++----------------------------------+----------+
+| ID                               | Name     |
++----------------------------------+----------+
+| c14f4133ab044f4ca002e795904383d3 | admin    |
+| 48aa640562d14ffab7bdee26a90bd484 | demo     |
+| 434109ca12b54477945f490fbc2ee4e3 | alt_demo |
+| 3c4ebde0229e4f89af27a8d78ebf57c2 | nova     |
+| aab6960638964c27a5500e644fafda01 | glance   |
+| 08e6e73d9d3942df99ae8d290027652f | cinder   |
++----------------------------------+----------+
+```
+---
+#Openstack
+##Keystone 
+```basch
+$ openstack role list
++----------------------------------+---------------+
+| ID                               | Name          |
++----------------------------------+---------------+
+| 76816e40d9d44200b85b98a9326fcb61 | admin         |
+| 9961fe4db10846319f91054071926269 | Member        |
+| d11de740d31b4e27aa1b1db81cac268c | service       |
++----------------------------------+---------------+
+```
+---
+#Openstack
+##Keystone 
+
+le user "admin" à le role "admin" dans le projet "demo" et dans le projet "alt-demo"
+
+```basch
+$ openstack role list --user admin --project demo
++----------------------------------+-------+---------+-------+
+| ID                               | Name  | Project | User  |
++----------------------------------+-------+---------+-------+
+| 76816e40d9d44200b85b98a9326fcb61 | admin | demo    | admin |
++----------------------------------+-------+---------+-------+
+$ openstack role list --user admin --project alt_demo
++----------------------------------+-------+----------+-------+
+| ID                               | Name  | Project  | User  |
++----------------------------------+-------+----------+-------+
+| 76816e40d9d44200b85b98a9326fcb61 | admin | alt_demo | admin |
++----------------------------------+-------+----------+-------+
+```
+---
+#Openstack
+##Keystone
+tandis que le user demo a le role member dans le projet demo
+```basch
+$ openstack role list --user demo --project demo
++----------------------------------+-------------+---------+------+
+| ID                               | Name        | Project | User |
++----------------------------------+-------------+---------+------+
+| 9961fe4db10846319f91054071926269 | Member      | demo    | demo |
++----------------------------------+-------------+---------+------+
+```
 ---
 #Openstack
 ##Keystone
 
+la notion d'endpoint :
+- chaque service Openstack est enregistré dans keystone;
+- il enregistre son type;
+- il enregistre son URL;
+```basch
+$ openstack endpoint list
++----------------------------------+-----------+--------------+----------------+
+| ID                               | Region    | Service Name | Service Type   |
++----------------------------------+-----------+--------------+----------------+
+| bdb373a7c92546a08fcae97d5e64280d | RegionOne | glance       | image          |
+| b057b3c9c007439cbe588c77e4b802d6 | RegionOne | cinderv2     | volumev2       |
+| bc3a4293d2df41149936726049a99c2d | RegionOne | nova         | compute        |
+| e00562c57f0b46f2a504adebe3276d0f | RegionOne | keystone     | identity       |
+| 8db911c7eed2460c9250186176a6fc5b | RegionOne | nova_legacy  | compute_legacy |
+| 13d006f2a5b74e24bbee04b38c2f9bc5 | RegionOne | cinder       | volume         |
++----------------------------------+-----------+--------------+----------------+
+```
+---
+#Openstack
+##Keystone
+```basch
+$ openstack endpoint show keystone
++--------------+-----------------------------------+
+| Field        | Value                             |
++--------------+-----------------------------------+
+| adminurl     | http://192.168.122.237:35357/v2.0 |
+| enabled      | True                              |
+| id           | e00562c57f0b46f2a504adebe3276d0f  |
+| internalurl  | http://192.168.122.237:5000/v2.0  |
+| publicurl    | http://192.168.122.237:5000/v2.0  |
+| region       | RegionOne                         |
+| service_id   | 208c0d3e39f943ba8f5be8425daafb3c  |
+| service_name | keystone                          |
+| service_type | identity                          |
++--------------+-----------------------------------+
+```
+---
+#Openstack
+##Keystone
+La notion de token : 
+- avant d'utiliser un endpoint, l'utilisateur s'authentifie via keystone et son username/password/tenant;
+- keystone lui renvoie un token;
+- l'utilisateur emploiera ce token pour s'authentifier sur les endpoints;
+- chaque endpoint vérifiera la validité de ce token auprès de keystone avant de traiter la requete;
+- keystone donnera également le rôle de l'utilisateur au endpoint;
+- ainsi l'endpoint pourra vérifier si l'utilisateur : 
+    - à le droit de demander la requete (role);
+    - à le quota nécéssaire pour créer la resource;
+
+---
+#Openstack
+##Keystone
+```basch
+$ openstack token issue --os-username admin --os-project-name admin --os-auth-url http://localhost:5000/v2.0 
+Password: 
++------------+----------------------------------+
+| Field      | Value                            |
++------------+----------------------------------+
+| expires    | 2016-04-01T15:41:53Z             |
+| id         | aa521d73f8654911a181b964b01892f4 |
+| project_id | 80d01fa581d041d9bfa1770a5ae09ad9 |
+| user_id    | c14f4133ab044f4ca002e795904383d3 |
++------------+----------------------------------+
+```
+Je peux utiliser le token aa521d73f8654911a181b964b01892f4 pour faire des requetes sur les endpoint.
+
+---
+#Openstack
+##Keystone - résumé
+
+<p style="text-align:center;"><img src="http://2.bp.blogspot.com/-9E7v6qpQr4Y/UyHiinS7XCI/AAAAAAAAAAM/XWbt2qvw1is/s1600/SCH_5002_V00_NUAC-Keystone.png " style="width: 700px;"/></p>
+
 ---
 #Openstack
 ##Glance
+
+---
+#Openstack
+##Cinder
 
 ---
 #Openstack
@@ -464,7 +639,7 @@ Il devenait trop difficile de déterminer quels projets devaient être "integrat
 
 ---
 #Openstack
-##Cinder
+##Heat
 
 ---
 #Openstack
