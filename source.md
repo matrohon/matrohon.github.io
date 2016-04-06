@@ -447,22 +447,27 @@ Il devenait trop difficile de déterminer quels projets devaient être "integrat
 
 Keystone est l'une des brique de base d'openstack, et est indispensable à son fonctionnement;
 
-Keystone est accessible par API : 
-- API admin : port 35357;
-- API user : port 5000;
-
 Keystone gère : 
 - la liste des utilisateurs;
 - la liste des tenants/projets;
 - la liste des roles;
 - la correspondance entre les rôles<->utilisateurs<->tenants
-- l'authentification des utilisateurs par attribution de token;
 - le catalogue des service Openstack;
-
+- l'authentification des utilisateurs par attribution de token;
 
 ---
 #Openstack
-##Keystone 
+##Keystone
+
+Keystone est accessible par API : 
+- API admin : port 35357;
+- API user : port 5000;
+
+Keystone existe en deux versions d'API : v2 et v3. La v3 ajoute la gestion des domaines;
+
+---
+#Openstack
+##Keystone - Identity
 
 La notion de __tenant__ (aussi appelé __projet__), __user__, __role__ :
 - un tenant ou projet, est une organisation à laquelle sont allouées des resources physiques du cloud (CPU/RAM/Disk...);
@@ -474,7 +479,7 @@ La notion de __tenant__ (aussi appelé __projet__), __user__, __role__ :
 
 ---
 #Openstack
-##Keystone 
+##Keystone - Identity
 
 ```basch
 $ openstack project list
@@ -502,7 +507,7 @@ $ openstack user list
 ```
 ---
 #Openstack
-##Keystone 
+##Keystone - Policy
 ```basch
 $ openstack role list
 +----------------------------------+---------------+
@@ -515,7 +520,7 @@ $ openstack role list
 ```
 ---
 #Openstack
-##Keystone 
+##Keystone - Policy
 
 le user "admin" à le role "admin" dans le projet "demo" et dans le projet "alt-demo"
 
@@ -535,7 +540,7 @@ $ openstack role list --user admin --project alt_demo
 ```
 ---
 #Openstack
-##Keystone
+##Keystone - Policy
 tandis que le user demo a le role member dans le projet demo
 ```basch
 $ openstack role list --user demo --project demo
@@ -547,12 +552,20 @@ $ openstack role list --user demo --project demo
 ```
 ---
 #Openstack
-##Keystone
+##Keystone - Catalog
 
 la notion d'endpoint :
 - chaque service Openstack est enregistré dans keystone;
 - il enregistre son type;
-- il enregistre son URL;
+- il enregistre ses URL;
+    - PublicURL;
+    - AdminURL;
+    - InternalURL;
+
+---
+#Openstack
+##Keystone - Catalog
+
 ```basch
 $ openstack endpoint list
 +----------------------------------+-----------+--------------+----------------+
@@ -568,7 +581,7 @@ $ openstack endpoint list
 ```
 ---
 #Openstack
-##Keystone
+##Keystone - Catalog
 ```basch
 $ openstack endpoint show keystone
 +--------------+-----------------------------------+
@@ -587,7 +600,7 @@ $ openstack endpoint show keystone
 ```
 ---
 #Openstack
-##Keystone
+##Keystone - Token
 La notion de token : 
 - avant d'utiliser un endpoint, l'utilisateur s'authentifie via keystone et son username/password/tenant;
 - keystone lui renvoie un token;
@@ -600,7 +613,7 @@ La notion de token :
 
 ---
 #Openstack
-##Keystone
+##Keystone - Token
 ```basch
 $ openstack token issue --os-username admin --os-project-name admin --os-auth-url http://localhost:5000/v2.0 
 Password: 
@@ -617,13 +630,159 @@ Je peux utiliser le token aa521d73f8654911a181b964b01892f4 pour faire des requet
 
 ---
 #Openstack
-##Keystone - résumé
+##Keystone - Résumé
 
 <p style="text-align:center;"><img src="http://2.bp.blogspot.com/-9E7v6qpQr4Y/UyHiinS7XCI/AAAAAAAAAAM/XWbt2qvw1is/s1600/SCH_5002_V00_NUAC-Keystone.png " style="width: 700px;"/></p>
 
 ---
 #Openstack
+##Keystone - Backend
+
+<p style="text-align:center;"><img src="http://allthingsopendotcom.files.wordpress.com/2014/07/keystone.png" style="width: 700px;"/></p>
+
+---
+#Openstack
+##Keystone - Fédération
+
+Keystone peut être configuré pour utiliser un module d'identité externe (idP) : 
+- keystone se décharge alors de ses parties :
+    - création de user;
+    - authentification de user;
+    - perte de mot de passe;
+- possibilité de partager un cloud entre plusieurs idPs;
+- le user peut alors accèder à plusieurs services internet en Single Sign On;
+- Algorithme :
+    - le client contacte keystone;
+    - keystone renvoie une liste d'idPs;
+    - le client s'authentifie avec un idPs;
+    - le client renvoie la réponse de l'idP à keystone;
+    - keystone valide cette réponse et renvoie un token au user;
+    - le user peut accèder aux services openstack avec ce token;
+
+https://wiki.openstack.org/wiki/Keystone/Federation/Blueprint
+
+---
+#Openstack
 ##Glance
+
+Glance est une autre brique de base d'Openstack;
+
+Ce service gère : 
+- les images de VMs;
+    -> une image est un disque avec un OS installé sans post-configuration (ex : debian 8.0, centos...)
+- les snapshot de VMs;
+    -> un snapshot est une sauvegarde du disque d'un VM à un instant T;
+- les proprités sur les images;
+
+Les demandes de démarrage de VM dans Openstack passent par la mention de l'image de base dans Glance;
+
+---
+#Openstack
+##Glance
+
+Plusieurs proprités peuvent être affectées à une images :
+- Type d'images;
+- Architecture;
+- Distribution;
+- Version de la distribution;
+- Espace dique minimum;
+- RAM minimum;
+- Publique ou privée;
+
+```basch
+$ glance image-list
++--------------------------------------+---------------------------------+
+| ID                                   | Name                            |
++--------------------------------------+---------------------------------+
+| ef6f18a3-886e-4eef-a65e-ddf5c6698d16 | cirros-0.3.4-x86_64-uec         |
+| 191d6af5-4764-448a-a9c0-b0842e6fbf0b | cirros-0.3.4-x86_64-uec-kernel  |
+| 86c0d488-757a-468d-afa8-553215e43144 | cirros-0.3.4-x86_64-uec-ramdisk |
++--------------------------------------+---------------------------------+
+```
+---
+#Openstack
+##Glance
+
+```basch
+$ glance image-show ef6f18a3-886e-4eef-a65e-ddf5c6698d16
++------------------+--------------------------------------+
+| Property         | Value                                |
++------------------+--------------------------------------+
+| checksum         | eb9139e4942121f22bbc2afc0400b2a4     |
+| container_format | ami                                  |
+| created_at       | 2016-04-05T13:24:30Z                 |
+| disk_format      | ami                                  |
+| id               | ef6f18a3-886e-4eef-a65e-ddf5c6698d16 |
+| kernel_id        | 191d6af5-4764-448a-a9c0-b0842e6fbf0b |
+| min_disk         | 0                                    |
+| min_ram          | 0                                    |
+| name             | cirros-0.3.4-x86_64-uec              |
+| owner            | df0c49848a864914b76788ff320eccbc     |
+| protected        | False                                |
+| ramdisk_id       | 86c0d488-757a-468d-afa8-553215e43144 |
+| size             | 25165824                             |
+| status           | active                               |
+| tags             | []                                   |
+| updated_at       | 2016-04-05T13:24:30Z                 |
+| virtual_size     | None                                 |
+| visibility       | public                               |
++------------------+--------------------------------------+
+```
+
+---
+#Openstack
+##Glance
+
+Plusieurs format de disque sont utilisables : 
+- raw
+- vmdk, vhd (VMWare, Xen, Microsoft, VirtualBox....)
+- vdi (VirtualBox, qemu)
+- iso
+- __qcow2__ (qemu, avec copy on write)
+- aki, ari, ami (Amazon EC2)
+
+On peut aussi utiliser des formats de Containers (disk+metadata) :
+- bare (pas de conteneurs)
+- ovf/ova (VMWare, Xen...)
+- ami/ari/aki (Amazon EC2...)
+- docker
+
+---
+#Openstack
+##Glance
+
+Glance écoute sur le port 9292, comme nous le dit le catalogue de service Keystone :
+
+```basch
+$ openstack endpoint show glance
++--------------+----------------------------------+
+| Field        | Value                            |
++--------------+----------------------------------+
+| adminurl     | http://192.168.122.237:9292      |
+| enabled      | True                             |
+| id           | bec00829127843e6888b958e15945035 |
+| internalurl  | http://192.168.122.237:9292      |
+| publicurl    | http://192.168.122.237:9292      |
+| region       | RegionOne                        |
+| service_id   | 7129a41efc974c998464bc196f96e839 |
+| service_name | glance                           |
+| service_type | image                            |
++--------------+----------------------------------+
+```
+
+---
+#Openstack
+##Glance
+
+<p style="text-align:center;"><img src="http://4.bp.blogspot.com/-8BGR7XSvuSw/VEr6NqccUKI/AAAAAAAAAGc/PP4yLwUYzpI/s1600/glance.png" style="width: 700px;"/></p>
+
+- glance API : 
+    - expose l'API;
+    - valide le token avec keystone;
+    - traite les requètes relatives aux images;
+- glance Registry : gère les metadat des images;
+- glance database : contient les infos des images;
+- glance backend : espaces de stockage des images;
 
 ---
 #Openstack
