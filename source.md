@@ -25,20 +25,134 @@ Principale actvité : Openstack/Neutron
 name: agenda
 # Agenda
 
+1. [Cloud Computing](#cloud)
 1. [Virtualisation](#virtualisation)
 1. [Openstack](#openstack)
-1. Keystone
-1. Glance
-1. Nova
-1. Neutron
-1. Cinder
-1. Swift
-1. Heat
-1. CI/CD Openstack
+    1. [Keystone](#keystone)
+    1. [Glance](#glance)
+    1. [Nova](#nova)
+    1. Neutron
+    1. Cinder
+    1. Swift
+    1. Heat
+    1. CI/CD Openstack
+
+---
+template: agenda
+
+###.right[Cloud Computing]
+
+---
+name: cloud
+#Cloud computing
+##Avant le Cloud computing
+
+Pour assurer son bon fonctionnement, une application doit maitriser son environnement :
+- resources physiques (CPU/RAM);
+- stockage (disque, backup);
+- OS/Librairies/Soft sur chaque serveur;
+- accès réseau (IP Publique, firewall, load balancer);
+
+Chaque application nécéssitera donc un environnement dédié. 
+
+---
+#Cloud computing
+##Avant le Cloud computing
+
+Pour les petites entreprises sans service IT, le développeur d'application doit se transformer en admin système/réseau/sotackage pour déployer son environnement.
+
+Dans de plus grosses entreprises, le développeur d'application passera par les étapes suivantes :
+
+- demander au service IT l'achat d'un serveur dédié;
+- demander au service Réseau un port/VLan dédié, et le réglage des firewall/load balancer...
+- demander au service Stockage un environnement backuper pour stocker ses données;
+
+---
+#Cloud computing
+##Avant le Cloud computing
+
+Ces étapes sont souvent longues, donc peu flexibles : difficile de redimensionner rapidement son environnement en cas de pic ou de baisse d'activité de l'application;
+
+On finit souvent par avoir un environnement surdimensionné (CPU/RAM/Disk) :
+- volontairement : pour ne pas avoir à le modifier en cas de forte charge de l'application;
+- involontairement : on utilise le matériel sourcé par le département IT/Réseau/Stockage, qui ne correspond pas forcément au besoin (trop de CPU/RAM/Disk)
+
+Les datacenter deviennent alors une collection de serveurs sous-exploités!!
+
+---
+#Cloud computing
+
+Grâce au cloud computing, on va __flexibiliser__ l'accès aux resources, et __optimiser__ leur utilisation;
+
+[Definition Wikipedia](https://en.wikipedia.org/wiki/Cloud_computing) :
+- On demand : utlisation et facturation uniquement le temps nécéssaire.
+- Shared processing resources and data : mutualisation des infrastructures;
+
+Au lieu d'avoir une infrastructure physique par projet, chaque projet va louer son infrastructure chez un prestataire tiers (interne ou externe à l'entreprise) :
+- pas de compétences nécéssaire d'administration de l'infrastructure dans le projet;
+- prévision des couts "pay as you go";
+- adaptation rapide en cas de pic/baisse d'activité du projet;
+
+---
+#Cloud computing
+##Concept \*_as_a_Service
+* Service en ligne (__Cloud__);
+* Privilégie la facturation à l'usage;
+* Accessible via des APIs;
+
+--
+count: false
+
+Différents types de \*aaS :
+* Storage (__STaaS__) : Swift
+    - offres commerciales : Google Drive, Amazon S3, Dropbox
+
+--
+count: false
+
+* Infra (__IaaS__) : Openstack, Cloudstack, VMWare
+    - offres commerciales : Google Compute, Amazon EC2, Azure, Cloudwatt
+
+--
+count: false
+
+* Platform (__PaaS__) : Cloud foundry
+    - offres commerciales : Heroku, Scalingo, Docker
+
+--
+count: false
+
+* Software (__SaaS__) : ?
+    - offres commerciales : Google Doc, Office 365, Photoshop
+
+
+--
+count: false
+Et bien d'autres (VPNaas, DBaas...)
+
+
+---
+#Cloud computing
+##Rationnaliser l'IT
+
+Si on s'appuie sur des éléments physiques, il est très difficile d'obtenir la flexibilité.
+Mettre a disposition un serveur physique nécéssite des étapes manuelles.
+
+Côté réseau et stockage, des technologie de virtualisation existent et peuvent assez facilement être pilotée via des API en mode aaS :
+- Réseau virtuel : segmentation logiciel
+- Stockage virtuel : NFS, cifs (file), LVM (block)
+
+Grâce aux nouvelles technologies de virtualisation d'OS, on va pouvoir créer des serveurs virtuels, beaucoup plus simples à piloter via des API en mode aaS;
+
+---
+template: agenda
+
+###.right[Virtualisation]
 
 ---
 name: virtualisation
-#La machine virtuelle (VM)
+#Virtualisation
+##La machine virtuelle (VM)
 
 - Un système d'exploitation (OS) tournant comme un simple logiciel;
 - l'OS n'a pas conscience d'être virtualisé par un autre OS;
@@ -50,7 +164,8 @@ name: virtualisation
 <p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Diagramme_ArchiEmulateur.png" width="400px"/></p>
 
 ---
-#L'hyperviseur
+#Virtualisation
+##L'hyperviseur
 L'hyperviseur a pour rôle de gérer les VMs et d'émuler les accès des VMs au matériel.
 
 Historiquement, il existe 2 types d'hyperviseurs : 
@@ -61,7 +176,8 @@ Historiquement, il existe 2 types d'hyperviseurs :
 
 - type hybride : l'hyperviseur tourne dans le noyau (module linux) de l'OS existant (kvm)
 ---
-#L'émulation
+#Virtualisation
+##L'émulation
 
 La solution basique pour créer une VM consiste donc à émuler son matériel :
 
@@ -73,7 +189,8 @@ La solution basique pour créer une VM consiste donc à émuler son matériel :
     - toutes les instructions CPU doivent êter réinterpretées
 
 ---
-#L'émulation iso-matériel
+#Virtualisation
+##L'émulation iso-matériel
 
 
 Mais dans le CLoud Computing ce qui va nous intéresse c'est d'isoler les VMs, et non d'émuler du matériel.
@@ -82,7 +199,8 @@ Mais dans le CLoud Computing ce qui va nous intéresse c'est d'isoler les VMs, e
 Si ma VM connait le matériel du HOST, je n'ai plus les problèmes de performance?
 
 ---
-#L'émulation iso-matériel
+#Virtualisation
+##L'émulation iso-matériel
 
 Malheureusement __non__ :
 - l'OS du HOST cherche a executer des instructions privilégiées sur le CPU (protected mode, Ring 0), mais n'y est pas authorisé en tant que logiciel (Ring 3)
@@ -93,7 +211,8 @@ Malheureusement __non__ :
     - Pas d'accès performant (DMA) aux équipements d'entée/sortie (disque, carte réseau...)
 
 ---
-#L'émulation iso-matériel aidée
+#Virtualisation
+##L'émulation iso-matériel aidée
 
 La paravirtualisation (Xen):
 - les Guests sont au courant qu'ils sont virtualisés;
@@ -104,7 +223,8 @@ La paravirtualisation (Xen):
 <p style="text-align:center;"><img src="http://www.ibm.com/developerworks/library/l-virtio/figure1.gif" width="600px;"/></p>
 
 ---
-#L'émulation iso-matériel aidée
+#Virtualisation
+##L'émulation iso-matériel aidée
 Les améliorations matérielles :
 - Intel VT-x / AMD-V / VIA VT : authoriser les VMs à exécuter les instructions privilégiées;
 - Intel EPT / AMD RVI : authorise les VMs à acceder directement à la MMU;
@@ -117,7 +237,7 @@ Ces améliorations matérielles sont nativement intégrées dans les équipement
 #Virtualisation
 ##Créer ses VMs
 On peut directement le faire avec kvm :
-```basch
+```sh
 #qemu-img create -f qcow2 /tmp/img.qcow2 6G
 Formatting '/tmp/img.qcow2', fmt=qcow2 size=6442450944 encryption=off cluster_size=65536 lazy_refcounts=off refcount_bits=16
 #kvm -m 256 /tmp/img.qcow2
@@ -128,7 +248,7 @@ count: false
 
 <p style="text-align:center;"><img src="./img/kvm.png" style="width: 400px;"/></p>
 
-```basch
+```sh
 #ps -aux | grep kvm
 mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86_64 -enable-kvm -m 256 /tmp/img.qcow2
 ```
@@ -191,38 +311,13 @@ Si le nombre de resources vient a manquer, on peut toujours ajouter un serveur p
 Les resources physiques ne sont donc plus dédiées à un projet mais mutualisées pour plusieurs projets dans des DataCenter (DC) distants. C'est l'émergence du __Cloud Computing__
 
 ---
-name: virtualisation
-#Virtualisation
-##Rationnaliser l'IT
-Pour assurer son bon fonctionnement, chaque application doit maitriser son environnement d'exécution (OS/Librairies).
+template: agenda
 
-Sans virtualisation chaque application nécéssite son serveur dédié.
-
-- demander au service IT l'achat d'un serveur dédié;
-- demander au service Réseau un port/VLan dédié;
-- environnement contraint, peu flexible;
-- on finit souvent par avoir un serveur surdimensionné (CPU/RAM/Disk) :
-
-    - volontairement : pour ne pas avoir à le modifier en cas de forte charge de l'application;
-
-    - involontairement : on utilise le matériel sourcé par le département IT, qui ne correspond pas forcément à mon besoin (trop de CPU/RAM/Disk)
-
-Les datacenter deviennent alors une collection de serveurs sous-exploités!!
+###.right[Openstack]
 
 ---
 #Virtualisation
-##Rationnaliser l'IT
-Au lieu d'avoir un serveur physique par application, on va virtualiser les resources d'un serveur pour mutualiser les coûts, mais en gardant la segmentation logicielle.
-
-On obtient ainsi des VMs:
-- n'ayant accès qu'a une partie des resources (2 cpu sur 16, 2 Go de RAM /16Go, un disk de 20Go sur les 500Go dispo...)
-- mais ayant une son propre environnement d'exécution (OS/Librairies)
-
-La virtualisation a donc rapidement été adoptée dans les département IT des entreprises pour son __optimisation__ des resources et pour sa __flexibilité__.
-
----
-#Virtualisation
-##du cadeau de noel au public Cloud
+##Du cadeau de noel au public Cloud
 
 Ces techniques de virtualistion sont utilisées depuis longtemps chez les gros hébergeurs (GAFA), pour leur propre besoins interne.
 
@@ -237,45 +332,9 @@ c'est la naissance d'amazon EC2
 D'autres Cloud provider proposent des services accessibles à la demande, comme du storage et des software. Elles rencontrent un grand succes et on parle alors de \*aaS.
 
 ---
-#Virtualisation / \*aaS
-##Concept \*_as_a_Service
-* Service en ligne (__Cloud__);
-* Privilégie la facturation à l'usage;
-* Accessible via des APIs;
-
-
---
-count: false
-
-Différents types de \*aaS :
-* Storage (__STaaS__) : Google Drive, Amazon S3, Dropbox
-
---
-count: false
-
-* Infra (__IaaS__) : Google Compute, Amazon EC2, Azure, Cloudwatt
-
---
-count: false
-
-* Platform (__PaaS__) : Heroku, Scalingo, Docker
-
---
-count: false
-
-* Software (__SaaS__) : Google Doc, Office 365, Photoshop
-
-
---
-count: false
-Différents modèles de facturation :
-* Quantité de stockage, de cpu, de mémoire, de bande passante, d'utilisateurs
-* Par minute, semaine, mois, an.
-
----
 #Virtualisation / IaaS
 ##La NASA
-Des son côté, la NASA utilise un clone d'EC2 pour son cloud privé, géré par Eucalyptus. Mais sans grande satisfaction, car trop fermé et pas assez modulaire.
+De son côté, la NASA utilise un clone d'EC2 pour son cloud privé, géré par Eucalyptus. Mais sans grande satisfaction, car trop fermé et pas assez modulaire.
 
 Beaucoup de déploiement de cloud IaaS s'oriente vers VMWare qui monopolise le marché.
 Un alternative Opensource est plus que nécéssaire pour concurrencer VMWare.
@@ -283,7 +342,7 @@ Un alternative Opensource est plus que nécéssaire pour concurrencer VMWare.
 La Nasa lance donc un nouveau cloud manager opensource, plus flexible, appélé Nova. Rackspace, un gros acteur de l'hébergement aux USA se joint à l'éffort pour creer Openstack.
 Très vite, il est décidé d'héberger le projet dans une fondation, afin d'en assurer l'indépendance, et de fédérer le plus d'entreprise.
 
-La fondation Openstack est alors créee et l'engouement est rapide.
+La fondation Openstack est alors créée et l'engouement est rapide.
 
 Une autre initiative Opensource voit également le jour : Cloudstack. Menée par Citrix, qui détiens également Xen, Cloudstack est actuellement hébergé par la fondation Apache.
 
@@ -397,7 +456,18 @@ Chaque composant va fournir :
 ##Architecture nova/VMWare/postgre :
 <p style="text-align:center;"><img src="./img/OpenstackProjectDesign_vmware.png" style="width: 500px;"/></p>
 
+---
+#Openstack
+##Mutliples composants
+Chaque composant utilise le framework python Web Server Gateway Interface ([WSGI](http://wsgi.readthedocs.org/en/latest/)), configuré via la lib paste.deploy. Cette configuration est accessible via le fichier /etc/composant/*-paste.ini.
 
+Beaucoup de composants vont avoir le même genre de tache effectuer (gestion du fichier de config, gestion des log etc....). Pour factoriser ce travail, un ensemble de librairie sont proposées dans le projet transverse Openstack oslo.
+
+De même afin d'éviter des problèe d'incompatibilité de dépendances entre les projets Openstack, un pojet transverse appelé "requirements" à été créé. Lorqu'un projet veut utiliser/modifier une dépendance envers une librairy, il le fera via ce projet.
+
+Chaque composant peut gérér l'accès à ces API en fonction de l'utilisateur et de son rôle. Il le fait via son fichier /etc/composant/policy.json
+
+Enfin, chaque composant fournit un client CLI qui facilite l'utilisation de l'API REST via la ligne de commande.
 
 ---
 #Openstack
@@ -443,7 +513,169 @@ Il devenait trop difficile de déterminer quels projets devaient être "integrat
 
 ---
 #Openstack
+##Demo
+Dans cette première démo, nous allons créer une VM, et étudier les étapes et les composants indispensables au boot d'une VM dans Openstack. 
+
+---
+class: center
+#Openstack
+##Demo - Login
+
+<img src="./img/horizon_login.png" style="width: 300px;"/>
+
+---
+class: center
+#Openstack
+##Demo - Tableau de bord
+
+<img src="./img/horizon_dashboard.png" style="width: 700px;"/>
+
+---
+class: center
+#Openstack
+##Demo - Creation d'une VM
+
+<img src="./img/horizon_dashboard_instances.png" style="width: 700px;"/>
+
+---
+class: center
+#Openstack
+##Demo - Creation d'une VM
+
+<img src="./img/horizon_launch_instances1.png" style="width: 700px;"/>
+
+---
+class: center
+#Openstack
+##Demo - Creation d'une VM
+
+<img src="./img/horizon_launch_instances2.png" style="width: 700px;"/>
+
+---
+class: center
+#Openstack
+##Demo - Creation d'une VM
+
+<img src="./img/horizon_launch_instances2.png" style="width: 700px;"/>
+
+---
+class: center
+#Openstack
+##Demo - Creation d'une VM
+
+<img src="./img/horizon_running_instance.png" style="width: 700px;"/>
+
+---
+#Openstack
+##Demo
+
+Dans cette simple démo, nous avons utilisés 3 composants indispensables pour booter une VM : 
+- keystone : pour s'identifier;
+- glance : pour choisir l'image de base;
+- nova : pour créer la VM;
+
+Nous avons également utilisé un composant facultatif : 
+- horizon : le tableau de bord
+
+---
+#Openstack
+##Demo
+
+Toute cette démo aurait pu se passer d'horizon si on avait utilisé notre login/password conjointement aux clients en ligne de commande de :
+
+- glance pour connaitre les images disponibles;
+```sh
+$ glance --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ image-list
++--------------------------------------+---------------------------------+
+| ID                                   | Name                            |
++--------------------------------------+---------------------------------+
+| b6305617-0451-46d8-98fd-2fde8f1a9c98 | cirros-0.3.4-x86_64-uec         |
++--------------------------------------+---------------------------------+
+```
+
+---
+#Openstack
+##Demo
+- nova pour lister les flavor;
+
+```sh
+$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ flavor-list
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+| ID | Name      | Memory_MB | Disk | Ephemeral | Swap | VCPUs | RXTX_Factor | Is_Public |
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+| 1  | m1.tiny   | 512       | 1    | 0         |      | 1     | 1.0         | True      |
+| 2  | m1.small  | 2048      | 20   | 0         |      | 1     | 1.0         | True      |
+| 3  | m1.medium | 4096      | 40   | 0         |      | 2     | 1.0         | True      |
+| 4  | m1.large  | 8192      | 80   | 0         |      | 4     | 1.0         | True      |
+| 5  | m1.xlarge | 16384     | 160  | 0         |      | 8     | 1.0         | True      |
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+``` 
+
+---
+#Openstack
+##Demo
+- nova pour booter la VM;
+```sh
+$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ boot --flavor 1 --image cirros-0.3.4-x86_64-uec vm1
++--------------------------------------+----------------------------------------------------------------+
+| Property                             | Value                                                          |
++--------------------------------------+----------------------------------------------------------------+
+| OS-EXT-STS:vm_state                  | building                                                       |
+....
+| id                                   | ed8af0fe-9817-4533-a599-c8dafe23c66b                           |
+| image                                | cirros-0.3.4-x86_64-uec (b6305617-0451-46d8-98fd-2fde8f1a9c98) |
+....
+| name                                 | vm1                                                            |
+| status                               | BUILD                                                          |
+...
++--------------------------------------+----------------------------------------------------------------+
+```
+
+---
+#Openstack
+##Demo
+- nova pour afficher le status de la VM;
+```sh
+$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ list
++--------------------------------------+------+--------+------------+-------------+------------------+
+| ID                                   | Name | Status | Task State | Power State | Networks         |
++--------------------------------------+------+--------+------------+-------------+------------------+
+| ed8af0fe-9817-4533-a599-c8dafe23c66b | vm1  | ACTIVE | -          | Running     | private=10.0.0.3 |
++--------------------------------------+------+--------+------------+-------------+------------------+
+```
+
+---
+#Openstack
+##Demo
+
+Par commodité, les clients des composants peuvent utliser des variables d'environnement : 
+
+```sh
+$ env | grep OS
+OS_PASSWORD=labo
+OS_AUTH_URL=http://192.168.122.241:5000/v2.0
+OS_USERNAME=demo
+OS_TENANT_NAME=demo
+
+$ nova list
++--------------------------------------+------+--------+------------+-------------+------------------+
+| ID                                   | Name | Status | Task State | Power State | Networks         |
++--------------------------------------+------+--------+------------+-------------+------------------+
+| ed8af0fe-9817-4533-a599-c8dafe23c66b | vm1  | ACTIVE | -          | Running     | private=10.0.0.3 |
++--------------------------------------+------+--------+------------+-------------+------------------+
+```
+
+---
+template: agenda
+
+###.right[Openstack - Keystone]
+
+---
+name: keystone
+#Openstack
 ##Keystone
+
+Avant de pouvoir utiliser un cloud Opensatck, il faut __s'identifier__!!
 
 Keystone est l'une des brique de base d'openstack, et est indispensable à son fonctionnement;
 
@@ -452,8 +684,10 @@ Keystone gère :
 - la liste des tenants/projets;
 - la liste des roles;
 - la correspondance entre les rôles<->utilisateurs<->tenants
-- le catalogue des service Openstack;
+- le catalogue des services Openstack;
 - l'authentification des utilisateurs par attribution de token;
+
+La population des entrées dans la base Keystone est faite généralement par l'administrateur du cloud Openstack
 
 ---
 #Openstack
@@ -465,6 +699,10 @@ Keystone est accessible par API :
 
 Keystone existe en deux versions d'API : v2 et v3. La v3 ajoute la gestion des domaines;
 
+Keystone est composé de plusieurs sous parties :
+
+<p style="text-align:center;"><img src="http://allthingsopendotcom.files.wordpress.com/2014/07/keystone.png" style="width: 500px;"/></p>
+
 ---
 #Openstack
 ##Keystone - Identity
@@ -472,7 +710,7 @@ Keystone existe en deux versions d'API : v2 et v3. La v3 ajoute la gestion des d
 La notion de __tenant__ (aussi appelé __projet__), __user__, __role__ :
 - un tenant ou projet, est une organisation à laquelle sont allouées des resources physiques du cloud (CPU/RAM/Disk...);
 - chaque utilisateur appartient à un tenant;
-- pour s'identifier sur un cloud openstack, un user utilisera le couple user/tenant;
+- pour s'identifier sur un cloud openstack, un user utilisera le couple user;
 - un utilisateur peut appartenir à plusieurs tenant;
 - lorsqu'un utilisateur créé une resource (ex. une VM), il la créé pour le compte d'un tenant;
 - chaque utilisateur à un rôle dans chacun de ses tenants (admin/member...);
@@ -481,7 +719,7 @@ La notion de __tenant__ (aussi appelé __projet__), __user__, __role__ :
 #Openstack
 ##Keystone - Identity
 
-```basch
+```sh
 $ openstack project list
 +----------------------------------+--------------------+
 | ID                               | Name               |
@@ -508,7 +746,7 @@ $ openstack user list
 ---
 #Openstack
 ##Keystone - Policy
-```basch
+```sh
 $ openstack role list
 +----------------------------------+---------------+
 | ID                               | Name          |
@@ -522,9 +760,9 @@ $ openstack role list
 #Openstack
 ##Keystone - Policy
 
-le user "admin" à le role "admin" dans le projet "demo" et dans le projet "alt-demo"
+Le user "admin" à le role "admin" dans le projet "demo" et dans le projet "alt-demo"
 
-```basch
+```sh
 $ openstack role list --user admin --project demo
 +----------------------------------+-------+---------+-------+
 | ID                               | Name  | Project | User  |
@@ -541,8 +779,8 @@ $ openstack role list --user admin --project alt_demo
 ---
 #Openstack
 ##Keystone - Policy
-tandis que le user demo a le role member dans le projet demo
-```basch
+Tandis que le user demo a le role member dans le projet demo
+```sh
 $ openstack role list --user demo --project demo
 +----------------------------------+-------------+---------+------+
 | ID                               | Name        | Project | User |
@@ -553,8 +791,7 @@ $ openstack role list --user demo --project demo
 ---
 #Openstack
 ##Keystone - Catalog
-
-la notion d'endpoint :
+La notion __d'endpoint__ :
 - chaque service Openstack est enregistré dans keystone;
 - il enregistre son type;
 - il enregistre ses URL;
@@ -565,8 +802,7 @@ la notion d'endpoint :
 ---
 #Openstack
 ##Keystone - Catalog
-
-```basch
+```sh
 $ openstack endpoint list
 +----------------------------------+-----------+--------------+----------------+
 | ID                               | Region    | Service Name | Service Type   |
@@ -582,7 +818,7 @@ $ openstack endpoint list
 ---
 #Openstack
 ##Keystone - Catalog
-```basch
+```sh
 $ openstack endpoint show keystone
 +--------------+-----------------------------------+
 | Field        | Value                             |
@@ -614,7 +850,7 @@ La notion de token :
 ---
 #Openstack
 ##Keystone - Token
-```basch
+```sh
 $ openstack token issue --os-username admin --os-project-name admin --os-auth-url http://localhost:5000/v2.0 
 Password: 
 +------------+----------------------------------+
@@ -637,6 +873,8 @@ Je peux utiliser le token aa521d73f8654911a181b964b01892f4 pour faire des requet
 ---
 #Openstack
 ##Keystone - Backend
+
+Les différentes partie de keystone peuvent s'appuyer sur différents backend :
 
 <p style="text-align:center;"><img src="http://allthingsopendotcom.files.wordpress.com/2014/07/keystone.png" style="width: 700px;"/></p>
 
@@ -663,18 +901,49 @@ https://wiki.openstack.org/wiki/Keystone/Federation/Blueprint
 
 ---
 #Openstack
+##Keystone - API utilisateur
+
+Les API de Keystone sont principalement utilent pour l'administrateur du cloud Openstack.
+
+Les utilisateurs les utilisent utilisent de manière transparante pour 
+- s'authentifier;
+- obtenir un token;
+- obtenir le catalogue de service;
+
+Ainsi l'URL de keystone sera souvent utilisée comme __point d'entrée__ vers un cloud openstack : pour que l'utilisateur puisse utiliser un cloud Openstack, l'admin du cloud lui fournirra l'URL Keystone, un tenant et un user/password;
+
+Par exemple, ce sont les seuls éléments nécéssait dans nova pour lister ses VMs :
+```sh
+$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ list
+```
+
+---
+#Openstack
+##Keystone - API utilisateur
+
+Dans horizon, on pourra interagir avec keystone pour connaitre ses tenants :
+
+<img src="./img/horizon_keystone.png" style="width: 700px;"/>
+---
+template: agenda
+
+###.right[Openstack - Glance]
+---
+name: glance
+#Openstack
 ##Glance
+
+Avant de pouvoir déployer une VM, il faut choisir un __OS de base__, soit une __image de base__
 
 Glance est une autre brique de base d'Openstack;
 
 Ce service gère : 
-- les images de VMs;
-    -> une image est un disque avec un OS installé sans post-configuration (ex : debian 8.0, centos...)
-- les snapshot de VMs;
-    -> un snapshot est une sauvegarde du disque d'un VM à un instant T;
-- les proprités sur les images;
+- les images de base des VMs;
+    -> une image est un disque virtuel bootable (avec un OS installé; ex : debian 8.0, centos, iso...)
+- les propriétés sur les images;
+- les quotas d'espace utilisable par tenant pour ces images;
 
-Les demandes de démarrage de VM dans Openstack passent par la mention de l'image de base dans Glance;
+Les demandes de démarrage de VMs dans Openstack passent par la mention de l'image de base dans Glance;
 
 ---
 #Openstack
@@ -689,7 +958,7 @@ Plusieurs proprités peuvent être affectées à une images :
 - RAM minimum;
 - Publique ou privée;
 
-```basch
+```sh
 $ glance image-list
 +--------------------------------------+---------------------------------+
 | ID                                   | Name                            |
@@ -703,7 +972,7 @@ $ glance image-list
 #Openstack
 ##Glance
 
-```basch
+```sh
 $ glance image-show ef6f18a3-886e-4eef-a65e-ddf5c6698d16
 +------------------+--------------------------------------+
 | Property         | Value                                |
@@ -753,7 +1022,7 @@ On peut aussi utiliser des formats de Containers (disk+metadata) :
 
 Glance écoute sur le port 9292, comme nous le dit le catalogue de service Keystone :
 
-```basch
+```sh
 $ openstack endpoint show glance
 +--------------+----------------------------------+
 | Field        | Value                            |
@@ -774,25 +1043,69 @@ $ openstack endpoint show glance
 #Openstack
 ##Glance
 
-<p style="text-align:center;"><img src="http://4.bp.blogspot.com/-8BGR7XSvuSw/VEr6NqccUKI/AAAAAAAAAGc/PP4yLwUYzpI/s1600/glance.png" style="width: 700px;"/></p>
+<p style="text-align:center;"><img src="http://4.bp.blogspot.com/-8BGR7XSvuSw/VEr6NqccUKI/AAAAAAAAAGc/PP4yLwUYzpI/s1600/glance.png" style="width: 300px;"/></p>
 
 - glance API : 
     - expose l'API;
     - valide le token avec keystone;
     - traite les requètes relatives aux images;
-- glance Registry : gère les metadat des images;
+- glance Registry : gère les metadata des images;
 - glance database : contient les infos des images;
 - glance backend : espaces de stockage des images;
 
 ---
 #Openstack
-##Cinder
+##Glance - API utilisateur
+
+Chaque utilisateur pourra gérer ses propres images via un ensemble d'API et de commandes CLI : 
+```sh
+    image-create        Create a new image.
+    image-deactivate    Deactivate specified image.
+    image-delete        Delete specified image.
+    image-download      Download a specific image.
+    image-list          List images you can access.
+    image-reactivate    Reactivate specified image.
+    image-show          Describe a specific image.
+    image-tag-delete    Delete the tag associated with the given image.
+    image-tag-update    Update an image with the given tag.
+    image-update        Update an existing image.
+    image-upload        Upload data for a specific image.
+```
+
+Souvent les cloud provider proposent des images publiques à leur tenants.
 
 ---
+template: agenda
+
+###.right[Openstack - Nova]
+---
+name: nova
 #Openstack
 ##Nova
 
+J'ai un identifiant sur le cloud, j'ai des images de base pour mes VMs, je peux désormais __déployer ma VM__!
+
+Nova est le composant central d'Openstack.  Il est utilisé pour :
+- gérér les VMs (flavor, availability zone);
+- provisionner les VMs à leur démarrage (cloud-init);
+- donner accès aux VMs depuis l'extérieur du cloud (security-group/floating-IPs);
+
 ---
+#Openstack
+##Nova - concept
+
+
+---
+#Openstack
+##Horizon
+
+---
+name: cinder
+#Openstack
+##Cinder
+
+---
+name: neutron
 #Openstack
 ##Neutron
 
@@ -800,16 +1113,13 @@ $ openstack endpoint show glance
 #Openstack
 ##Heat
 
+
+
 ---
 #Openstack
 ##Swift
 
----
-#Openstack
-##Horizon
 
----
-#Openstack
-##Heat
+
 
 
