@@ -316,7 +316,7 @@ template: agenda
 ###.right[Openstack]
 
 ---
-#Virtualisation
+#Openstack
 ##Du cadeau de noel au public Cloud
 
 Ces techniques de virtualistion sont utilisées depuis longtemps chez les gros hébergeurs (GAFA), pour leur propre besoins interne.
@@ -329,10 +329,10 @@ tout le reste de l'année.
 Ils ont donc créé une offre publique de location de ses resources :
 c'est la naissance d'amazon EC2
 ```
-D'autres Cloud provider proposent des services accessibles à la demande, comme du storage et des software. Elles rencontrent un grand succes et on parle alors de \*aaS.
+D'autres Cloud provider proposent des services accessibles à la demande, comme du storage et des software. Elles rencontrent un grand succès et on parle alors de \*aaS.
 
 ---
-#Virtualisation / IaaS
+#Openstack
 ##La NASA
 De son côté, la NASA utilise un clone d'EC2 pour son cloud privé, géré par Eucalyptus. Mais sans grande satisfaction, car trop fermé et pas assez modulaire.
 
@@ -498,19 +498,28 @@ Historiquement les projet openstack se divisant entre :
 Il devenait trop difficile de déterminer quels projets devaient être "integrated", alors Openstack est passé en mode BigTent :
 
 - Tous projets relatifs à Openstack et respectant les 4 open peuvent devenir un projet openstack officiel;
-- La notion de DefCore persiste : éléments indispensable d'un cloud Openstack (nova, glance, keystone...);
+- La notion de DefCore persiste : éléments indispensables d'un cloud Openstack (nova, glance, keystone...);
 
 ---
 #Openstack
-##Architecture Simplifiée
+##Architecture simplifiée
 
 <p style="text-align:center;"><img src="http://docs.openstack.org/juno/install-guide/install/apt/content/figures/1/a/common/figures/openstack_havana_conceptual_arch.png" style="width: 500px;"/></p>
 ---
 #Openstack
-##Architecture Operationnelle
+##Architecture operationnelle
 
-<p style="text-align:center;"><img src="http://git.openstack.org/cgit/openstack/operations-guide/plain/doc/openstack-ops/figures/osog_0001.png" style="width: 600px;"/></p>
+<p style="text-align:center;"><img src="img/Openstack-archi.png" style="width: 600px;"/></p>
 
+---
+#Openstack
+##Architecture physique classique
+
+<p style="text-align:center;"><img src="http://www.thoughtsoncloud.com/wp-content/uploads/2014/08/Basic-architecture-with-OpenStack-networking.png" style="width: 500px;"/></p>
+
+- Cloud Controller node : composant central pour l'API, la DB, le server AMQP;
+- Compute node : héberge les VMs;
+- Network node (neutron) : heberge les services réseaux (server dhcp, router...);
 ---
 #Openstack
 ##Demo
@@ -867,7 +876,7 @@ Je peux utiliser le token aa521d73f8654911a181b964b01892f4 pour faire des requet
 ---
 #Openstack
 ##Keystone - Résumé
-
+http://lists.openstack.org/pipermail/openstack-dev/2016-April/091754.html
 <p style="text-align:center;"><img src="http://2.bp.blogspot.com/-9E7v6qpQr4Y/UyHiinS7XCI/AAAAAAAAAAM/XWbt2qvw1is/s1600/SCH_5002_V00_NUAC-Keystone.png " style="width: 700px;"/></p>
 
 ---
@@ -912,7 +921,7 @@ Les utilisateurs les utilisent utilisent de manière transparante pour
 
 Ainsi l'URL de keystone sera souvent utilisée comme __point d'entrée__ vers un cloud openstack : pour que l'utilisateur puisse utiliser un cloud Openstack, l'admin du cloud lui fournirra l'URL Keystone, un tenant et un user/password;
 
-Par exemple, ce sont les seuls éléments nécéssait dans nova pour lister ses VMs :
+Par exemple, ce sont les seuls éléments nécéssaires dans nova pour lister ses VMs :
 ```sh
 $ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ list
 ```
@@ -949,7 +958,7 @@ Les demandes de démarrage de VMs dans Openstack passent par la mention de l'ima
 #Openstack
 ##Glance
 
-Plusieurs proprités peuvent être affectées à une images :
+Plusieurs propriétés peuvent être affectées à une image :
 - Type d'images;
 - Architecture;
 - Distribution;
@@ -1020,7 +1029,7 @@ On peut aussi utiliser des formats de Containers (disk+metadata) :
 #Openstack
 ##Glance
 
-Glance écoute sur le port 9292, comme nous le dit le catalogue de service Keystone :
+Glance écoute sur le port 9292, comme nous stipulé dans le catalogue de service Keystone :
 
 ```sh
 $ openstack endpoint show glance
@@ -1086,18 +1095,393 @@ name: nova
 J'ai un identifiant sur le cloud, j'ai des images de base pour mes VMs, je peux désormais __déployer ma VM__!
 
 Nova est le composant central d'Openstack.  Il est utilisé pour :
-- gérér les VMs (flavor, availability zone);
+- gérér les VMs (flavor, scheduler, availability zone, console);
 - provisionner les VMs à leur démarrage (cloud-init);
 - donner accès aux VMs depuis l'extérieur du cloud (security-group/floating-IPs);
+- gère les quotas de CPU/RAM utilisables par chaque tenant;
 
 ---
 #Openstack
-##Nova - concept
+##Nova
 
+Comme tous les composants Opensatck, nova expose une API REST :
+
+```sh
+$ openstack endpoint show nova
++--------------+------------------------------------------------+
+| Field        | Value                                          |
++--------------+------------------------------------------------+
+| adminurl     | http://192.168.122.241:8774/v2.1/$(tenant_id)s |
+| enabled      | True                                           |
+| id           | ac2433935996492db9fcc7361f3257c9               |
+| internalurl  | http://192.168.122.241:8774/v2.1/$(tenant_id)s |
+| publicurl    | http://192.168.122.241:8774/v2.1/$(tenant_id)s |
+| region       | RegionOne                                      |
+| service_id   | 94d10d3d83a9494380883247968c0f07               |
+| service_name | nova                                           |
+| service_type | compute                                        |
++--------------+------------------------------------------------+
+```
 
 ---
 #Openstack
-##Horizon
+##Nova - Architecture
+
+<p style="text-align:center;"><img src="img/Openstack-archi-nova.png" style="width: 500px;"/></p>
+---
+#Openstack
+##Nova - Architecture physique classique
+
+<p style="text-align:center;"><img src="http://www.thoughtsoncloud.com/wp-content/uploads/2014/08/Basic-architecture-with-OpenStack-networking.png" style="width: 500px;"/></p>
+
+- Tous les services nova se retrouvent le controller node;
+- __SAUF__ nova-compute qui est sur les compute node, afin de piloter les VM pour le HOST sur lequel il se trouve;
+
+---
+#Openstack
+##Nova - Backends
+
+L'implémentation de référence dans nova utilise libvirt/KVM :
+- nova-compute reçoit un ordre de boot de VM;
+- nova-compute pilote la couche de virtualisation du HOST via libvirt pour instancier la VM demandée;
+- c'est l'implémentation que nous étudierons dans ce cours;
+
+Cepandant d'autres backend existent pour gérer les VM (ou container!) : 
+- Xen
+- Docker;
+- LXC;
+- VMWare Vcenter;
+
+---
+#Openstack
+##Nova - flavor
+
+Comme on l'a vu lors de la démo, avant de booter une VM, il faut choisir un flavor;
+
+Ces flavor caractérise une VM en spécifiant, par falvor :
+- la quantité de RAM;
+- le nombre de vCPU;
+- la taille du disque;
+
+---
+#Openstack
+##Nova - flavor
+
+Typiquement, un cloud openstack contiendra des flavor prédéfinis que l'on peut lister via l'API :
+
+```sh
+$ nova flavor-list
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+| ID | Name      | Memory_MB | Disk | Ephemeral | Swap | VCPUs | RXTX_Factor | Is_Public |
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+| 1  | m1.tiny   | 512       | 1    | 0         |      | 1     | 1.0         | True      |
+| 2  | m1.small  | 2048      | 20   | 0         |      | 1     | 1.0         | True      |
+| 3  | m1.medium | 4096      | 40   | 0         |      | 2     | 1.0         | True      |
+| 4  | m1.large  | 8192      | 80   | 0         |      | 4     | 1.0         | True      |
+| 5  | m1.xlarge | 16384     | 160  | 0         |      | 8     | 1.0         | True      |
++----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
+```
+
+---
+#Openstack
+##Nova - flavor
+
+Mais rien ne nous empeche de créer nos propres flavors :
+
+```sh
+$ nova flavor-create myflavor auto 1024 10 16 
++--------------------------------------+----------+-----------+------+-----------+------+-------+-------------+-----------+
+| ID                                   | Name     | Memory_MB | Disk | Ephemeral | Swap | VCPUs | RXTX_Factor | Is_Public |
++--------------------------------------+----------+-----------+------+-----------+------+-------+-------------+-----------+
+| 643d76d4-2a3b-4596-b770-67c278cef05d | myflavor | 1024      | 10   | 0         |      | 16    | 1.0         | True      |
++--------------------------------------+----------+-----------+------+-----------+------+-------+-------------+-----------+
+```
+
+---
+#Openstack
+##Nova - boot
+
+Une fois que l'on a notre flavor et notre image, on peut demander à nova de démarrer une VM :
+
+```sh
+$ nova boot --flavor m1.tiny --image cirros-0.3.4-x86_64-uec vm1
+```
+
+Grâce au flavor spécifé, nova connaitra les contrainte de notre VM. Il pourra la placer sur le host adéquat :
+- qui a suffisament de RAM;
+- qui a suffisament de CPU;
+- ...
+
+C'est le role de nova-scheduler;
+
+---
+#Openstack
+##Nova - scheduler
+
+Chaque nova-compute, sur chaque host, enregistre ses capacités (CPU, RAM,...) dans la base de données nova;
+
+nova-scheduler va utliser ces informations pour choisir le host/nova-compute qui hébergera la VM, via de phases :
+- le filtre : quels sont les host éligibles;
+- le poids : quel est le plus optimal et quels sont les hosts suivant en cas d'échec;
+<p style="text-align:center;"><img src="http://docs.openstack.org/kilo/config-reference/content/figures/4/a/a/common/figures/filteringWorkflow1.png" style="width: 400px;"/></p>
+
+---
+#Openstack
+##Nova - scheduler
+
+Il existe [beaucoup](#http://docs.openstack.org/mitaka/config-reference/compute/scheduler.html) de filtres à la disposition de l'administrateur du cloud parmi lesquels :
+
+- CoreFilter : uniquement les hosts avec suffisament de vCPUs;
+- RamFilter : uniquement les hosts avec suffisament de RAM;
+- DiskFilter : uniquement les hosts avec suffisament de disque;
+
+Ces filtres peuvent être paramétrés pour supporter l'oversubscription;
+
+---
+#Openstack
+##Nova - scheduler
+
+Pour l'utilisateur, il existe des moyens de contraindre le scheduler si les filtres adéquats sont activés. Par exemple :
+- Different(Same)HostFilter : 
+```sh
+$ nova boot --image cedef40a-ed67-4d10-800e-17455edce175 --flavor 1 \
+  --hint different_host=a0cf03a5-d921-4877-bb5c-86d26cf818e1 \
+  --hint different_host=8c19174f-4220-44f0-824a-cd1eeef10287 server-1
+```
+- ServerGroup(Anti)AffinityFilter : 
+```sh
+$ nova server-group-create --policy anti-affinity group-1
+$ nova boot --image IMAGE_ID --flavor 1 --hint group=SERVER_GROUP_UUID server-1
+```
+- JsonFilter :
+```sh
+$ nova boot --image 827d564a-e636-4fc4-a376-d36f7ebe1747 \
+  --flavor 1 --hint query='[">=","$free_ram_mb",1024]' server1
+```
+---
+#Openstack
+##Nova - scheduler
+
+L'adminitrateur peut également partitionner ses hosts dans différents host-aggregates, et paramétrer les flavor pour qu'une VM qui utilise un flovor soit schédulée sur ses hosts.
+
+Par exemple : 
+- tous les host qui ont des diques ssd sont regroupés dans le host-aggregate fast-io;
+- l'admin créé un flavor ssd;
+- dès qu'on utilisera le flavor ssd, le scheduler bootera la VM sur l'un des host de fast-io;
+
+l'admin peut également utiliser des availability-zone pour exposer ses host-aggregate via l'API à l'utilisateur :
+```sh
+$ nova boot --image IMAGE_ID --flavor 1 --availability-zone az_name server1
+```
+
+---
+#Openstack
+##Nova - accèder à la VM
+
+Maintenant que ma VM est démarrée, je souhaite y accèder.
+
+Souvent, on utilise une image cloud, paramétrée pour créer un user dont le mot de passe est donné dans la console, et accèssible via nova : 
+
+```sh
+$ nova console-log vm1
+...
+login as 'cirros' user. default password: 'cubswin:)'. use 'sudo' for root.
+```
+
+On peut alors utiliser un accès vnc à cette VMs : 
+```sh
+$ nova get-vnc-console vm1 novnc
++-------+--------------------------------------------------------------------------------------+
+| Type  | Url                                                                                  |
++-------+--------------------------------------------------------------------------------------+
+| novnc | http://192.168.122.241:6080/vnc_auto.html?token=d2e92cf6-0597-46ca-ac19-c998f6f042ab |
++-------+--------------------------------------------------------------------------------------+
+```
+Ce sont les composants nova-consoleauth et nova-console qui gèrent cette accès console;
+
+---
+#Openstack
+##Nova - accèder à la VM
+
+Une alternative à l'accès console est l'accès via ssh. Mais pour l'activer, il faut passer par deux autres étapes :
+- L'utlistation d'une IP publique (floating IP);
+- L'ouverture de flux vers cette VM (security group);
+
+---
+#Openstack
+##Nova - floating IPs
+
+Regardons quelle IP est attribuée à notre VM après son boot:
+
+```sh
+$ nova show vm1
++--------------------------------------+----------------------------------------------------------------+
+| Property                             | Value                                                          |
++--------------------------------------+----------------------------------------------------------------+
+...
+| private network                      | 10.0.0.2                                                       |
++--------------------------------------+----------------------------------------------------------------+
+```
+
+Ce n'est pas une IP accèssible depuis internet;
+
+Les IPs (v4) accessibles sont des resources relativement rares et donc facturées, mieux vaut les utiliser au compte goutte, pour des VMs Frontend, et non pour toutes les VMs.
+
+Ainsi, Openstack introduit le concept de floating IP : 
+- IP publique louée par un tenant;
+- Attribuable à n'importe quel VM;
+
+---
+#Openstack
+##Nova - floating IPs
+
+On va alors commencer par s'attribuer une floating-ip : 
+```sh
+$ nova floating-ip-create
++----+------------+-----------+----------+--------+
+| Id | IP         | Server Id | Fixed IP | Pool   |
++----+------------+-----------+----------+--------+
+| 1  | 172.24.4.1 | -         | -        | public |
++----+------------+-----------+----------+--------+
+```
+
+Avant de l'attribuer à une VM pour la rendre accessible depuis le réseau public (internet ou autre pour les cloud internes)
+
+```sh
+$ nova floating-ip-associate vm1 172.24.4.1
+$ nova floating-ip-list
++----+------------+--------------------------------------+----------+--------+
+| Id | IP         | Server Id                            | Fixed IP | Pool   |
++----+------------+--------------------------------------+----------+--------+
+| 1  | 172.24.4.1 | 4489d951-95ea-4024-be44-25d8f53dc095 | 10.0.0.2 | public |
++----+------------+--------------------------------------+----------+--------+
+```
+
+---
+#Openstack
+##Nova - security group
+
+J'ai une ip publique pour accèder à ma VM, mais par défaut, aucun traffic n'est authorisé :
+
+Je dois manipuler les ouvertures de flux via l'API : il s'agit de l'API nova "security group"
+
+Chaque VM appartient à un ou plusieurs security group : 
+```sh
+$ nova show vm1
++--------------------------------------+----------------------------------------------------------------+
+| Property                             | Value                                                          |
++--------------------------------------+----------------------------------------------------------------+
+...
+| security_groups                      | default                                                        |
++--------------------------------------+----------------------------------------------------------------+
+```
+
+Les security group fonctionnent sur le principe des white-list : tout traffic entrant dans la VM est interdit, sauf le traffic correspondant aux regles du security-group;
+
+---
+#Openstack
+##Nova - security group
+
+Nous allons donc placer notre VM dans un security-group authorisant l'accès SSH :
+
+```sh
+$ nova secgroup-create frontend-ssh frontend-ssh
++----+--------------+--------------+
+| Id | Name         | Description  |
++----+--------------+--------------+
+| 2  | frontend-ssh | frontend-ssh |
++----+--------------+--------------+
+$ nova secgroup-add-rule frontend-ssh tcp 22 22 0.0.0.0/0
++-------------+-----------+---------+-----------+--------------+
+| IP Protocol | From Port | To Port | IP Range  | Source Group |
++-------------+-----------+---------+-----------+--------------+
+| tcp         | 22        | 22      | 0.0.0.0/0 |              |
++-------------+-----------+---------+-----------+--------------+
+$ nova add-secgroup vm1 frontend-ssh
+```
+
+---
+#Openstack
+##Nova - accèder à la VM
+
+J'ai :
+- une IP publique;
+- le flux TCP port 22 ouvert;
+
+je peux accèder à ma VM en ssh :
+
+```sh
+$ ssh cirros@172.24.4.1
+cirros@172.24.4.1's password: 
+$ 
+```
+
+Mais je ne peux pas la pinger :
+```sh
+$ ping 172.24.4.1
+PING 172.24.4.1 (172.24.4.1) 56(84) bytes of data.
+ping: sendmsg: Operation not permitted
+```
+
+car je n'ai pas __ouvert le flux__ icmp dans le security group de ma VM!
+---
+#Openstack
+##Nova - keypairs
+
+Pour des raisons de sécurité et de facilité d'utilisation par des scripts, on privilègiera l'accès ssh par clé plutôt que par mot de passe.
+
+nova dispose d'un API pour gérer les clés d'accès au VMs : il s'agit des nova __keypairs__
+
+Avant de pouvoir attribuer une clé d'accès à une VM, il faut d'abord la générer :
+
+```sh
+$ ssh-keygen -t rsa -f cloud.key
+```
+
+Cette commande génère deux fichiers : 
+- cloud.key : la clé privé, à garder localment;
+- cloud.key.pub : la clé publique que l'on va utiliser dans l'API nova;
+
+On peut maintenant créer notre keypair : 
+```sh
+$ nova keypair-add --pub-key ./cloud.key.pub --key-type ssh cloud
+```
+---
+#Openstack
+##Nova - keypairs
+
+Malheureusement l'association d'une keypair à une VM se fait lors de l'instanciation de la VM (nova boot --key-name).
+
+Une possibilité pour utiliser la clé générée est de se connecter à la VM en ssh et d'éditer le fichier /home/username/.ssh/authorized_keys.
+
+Mais cela a des inconvénients, car en cas de rebuild de la VM, ce fichier sera perdu.
+
+---
+#Openstack
+##Nova - keypairs
+
+Il conviendra donc de creer la keypair avant de booter la VM : 
+
+```sh
+$ nova boot --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+```
+
+Une fois qu'on a attribué une floating-IP à la VM et que la VM est placé dans un security-group qui authorise l'accès ssh, on peut s'y connecter de l'exterieur via le certificat : 
+
+```sh
+ $ ssh -i cloud.key cirros@172.24.4.1
+ $
+```
+
+---
+#Openstack
+##Nova - configurer la VM
+
+Comme décrit précédemment, l'accès ssh par certificat s'établit par ajout de la clé ssh dans les fichier .ssh/authorized_keys de la VM.
+
+Cette configuration de la VM lors du boot permet de parmètrer l'image de base glance pour la personnaliser;
+ 
+C'est le role de __cloud-init__
 
 ---
 name: cinder
