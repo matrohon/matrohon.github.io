@@ -238,9 +238,9 @@ Ces améliorations matérielles sont nativement intégrées dans les équipement
 ##Créer ses VMs
 On peut directement le faire avec kvm :
 ```bash
-*# qemu-img create -f qcow2 /tmp/img.qcow2 6G
+*$ qemu-img create -f qcow2 /tmp/img.qcow2 6G
 Formatting '/tmp/img.qcow2', fmt=qcow2 size=6442450944 encryption=off cluster_size=65536 lazy_refcounts=off refcount_bits=16
-*# kvm -m 256 /tmp/img.qcow2
+*$ kvm -m 256 /tmp/img.qcow2
 ```
 
 --
