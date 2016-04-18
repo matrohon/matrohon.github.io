@@ -1479,9 +1479,98 @@ Une fois qu'on a attribué une floating-IP à la VM et que la VM est placé dans
 
 Comme décrit précédemment, l'accès ssh par certificat s'établit par ajout de la clé ssh dans les fichier .ssh/authorized_keys de la VM.
 
-Cette configuration de la VM lors du boot permet de parmètrer l'image de base glance pour la personnaliser;
- 
-C'est le role de __cloud-init__
+Cette configuration de la VM lors du boot permet de paramètrer l'image de base glance pour la personnaliser;
+
+C'est le role de __cloud-init__;
+
+cloud-init est un soft ce trouvant dans l'image de base. Son but est d'aller chercher les informations de paramétrage de l'image au boot.
+
+cloud-init peut aller chercher les info via le réseau ou via un configdrive
+
+---
+#Openstack
+##Nova - configurer la VM
+
+Accès par le réseau :
+- au boot, cloud-init envoie une requète à une IP spéciale : 169.254.169.254
+- depuis une VM, on peut retrouver ces infos :
+```sh
+$ curl http://169.254.169.254/latest/
+```
+
+Accès par configdrive :
+- un disque iso provisionner par nova est attaché à la VM au boot;
+- la VM monte se fichier et y lit les infos;
+- peut être utile si la VM n'a pas de dhcp, donc pas de réseau;
+- il faut spécifier l'utilisation du configdrive lors du boot de la VM : 
+```sh
+$ nova boot --config-drive true --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+```
+
+---
+#Openstack
+##Nova - configurer la VM
+
+Voyons ce qu'il y a dans les fichiers utilisés par cloud-init : 
+```sh
+$ curl http://169.254.169.254/latest/
+meta-data/
+user-data/
+```
+- meta-data : contient les informations de personnalistion paramétérés par nova (hostname, IP, clé-ssh....)
+- user-data : contient des informations ajoutés par l'ulitsateur au moment de l'instanciation de la VM
+
+---
+#Openstack
+##Nova - configurer la VM
+
+Beaucoup de choses peuvent être paramétrée par l'utilisateur gràce à la section user-data de [cloud-init](https://cloudinit.readthedocs.org/en/latest/topics/examples.html) :
+- installation de packages;
+- ajout d'utilisateurs;
+- modification de fichiers;
+-...
+```sh
+$ cat cloud-config.yaml 
+#cloud-config
+password: secret
+chpasswd: { expire: False }
+ssh_pwauth: True
+runcmd:
+  - [ 'sh', '-c', 'echo "Hello World" > /tmp/demo-run-cmd.txt]
+write_files:
+  - content: |
+    Hello World
+    path: /tmp/demo-write-files.txt
+$ nova boot --user-data ./cloud-config .yaml --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+```
+
+
+---
+#Openstack
+##Nova - configurer la VM
+
+Si l'image de la VM n'inclue pas cloud-init, il est toujours possible d'y injecter des fichiers à son instanciation :
+```sh
+$ nova boot --file /tmp/dst.txt=/tmp/src.txt --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+```
+
+---
+#Openstack
+##Nova - Démo
+
+Revoyons tous ça lors d'une démo avec le web UI d'horizon et profitons-en pour voir d'autres options de gestion de VM offertes par nova :
+- nova pause/unpause VM;
+- nova suspend/resume VM;
+- nova shelve/unshelve VM;
+- nova snapshot;
+
+---
+#Openstack
+##Nova - Démo
+
+Etudions ce qu'il c'est passé sur le compute-node hébergeant la VM :
+
+
 
 ---
 name: cinder
