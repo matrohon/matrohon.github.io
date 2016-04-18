@@ -237,10 +237,10 @@ Ces améliorations matérielles sont nativement intégrées dans les équipement
 #Virtualisation
 ##Créer ses VMs
 On peut directement le faire avec kvm :
-```sh
-#qemu-img create -f qcow2 /tmp/img.qcow2 6G
+```bash
+*# qemu-img create -f qcow2 /tmp/img.qcow2 6G
 Formatting '/tmp/img.qcow2', fmt=qcow2 size=6442450944 encryption=off cluster_size=65536 lazy_refcounts=off refcount_bits=16
-#kvm -m 256 /tmp/img.qcow2
+*# kvm -m 256 /tmp/img.qcow2
 ```
 
 --
@@ -248,8 +248,8 @@ count: false
 
 <p style="text-align:center;"><img src="./img/kvm.png" style="width: 400px;"/></p>
 
-```sh
-#ps -aux | grep kvm
+```bash
+*$ ps -aux | grep kvm
 mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86_64 -enable-kvm -m 256 /tmp/img.qcow2
 ```
 
@@ -594,7 +594,7 @@ Toute cette démo aurait pu se passer d'horizon si on avait utilisé notre login
 
 - glance pour connaitre les images disponibles;
 ```sh
-$ glance --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ image-list
+*$ glance --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ image-list
 +--------------------------------------+---------------------------------+
 | ID                                   | Name                            |
 +--------------------------------------+---------------------------------+
@@ -608,7 +608,7 @@ $ glance --os-username demo --os-password labo --os-tenant-name demo --os-auth-u
 - nova pour lister les flavor;
 
 ```sh
-$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ flavor-list
+*$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ flavor-list
 +----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
 | ID | Name      | Memory_MB | Disk | Ephemeral | Swap | VCPUs | RXTX_Factor | Is_Public |
 +----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
@@ -625,7 +625,7 @@ $ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url
 ##Demo
 - nova pour booter la VM;
 ```sh
-$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ boot --flavor 1 --image cirros-0.3.4-x86_64-uec vm1
+*$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ boot --flavor 1 --image cirros-0.3.4-x86_64-uec vm1
 +--------------------------------------+----------------------------------------------------------------+
 | Property                             | Value                                                          |
 +--------------------------------------+----------------------------------------------------------------+
@@ -645,7 +645,7 @@ $ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url
 ##Demo
 - nova pour afficher le status de la VM;
 ```sh
-$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ list
+*$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ list
 +--------------------------------------+------+--------+------------+-------------+------------------+
 | ID                                   | Name | Status | Task State | Power State | Networks         |
 +--------------------------------------+------+--------+------------+-------------+------------------+
@@ -660,13 +660,13 @@ $ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url
 Par commodité, les clients des composants peuvent utliser des variables d'environnement : 
 
 ```sh
-$ env | grep OS
+*$ env | grep OS
 OS_PASSWORD=labo
 OS_AUTH_URL=http://192.168.122.241:5000/v2.0
 OS_USERNAME=demo
 OS_TENANT_NAME=demo
 
-$ nova list
+*$ nova list
 +--------------------------------------+------+--------+------------+-------------+------------------+
 | ID                                   | Name | Status | Task State | Power State | Networks         |
 +--------------------------------------+------+--------+------------+-------------+------------------+
@@ -729,7 +729,7 @@ La notion de __tenant__ (aussi appelé __projet__), __user__, __role__ :
 ##Keystone - Identity
 
 ```sh
-$ openstack project list
+*$ openstack project list
 +----------------------------------+--------------------+
 | ID                               | Name               |
 +----------------------------------+--------------------+
@@ -740,7 +740,7 @@ $ openstack project list
 | de060cd2e96e4b1abdeb34b4cf1a121e | demo               |
 +----------------------------------+--------------------+
 
-$ openstack user list
+*$ openstack user list
 +----------------------------------+----------+
 | ID                               | Name     |
 +----------------------------------+----------+
@@ -756,7 +756,7 @@ $ openstack user list
 #Openstack
 ##Keystone - Policy
 ```sh
-$ openstack role list
+*$ openstack role list
 +----------------------------------+---------------+
 | ID                               | Name          |
 +----------------------------------+---------------+
@@ -772,13 +772,13 @@ $ openstack role list
 Le user "admin" à le role "admin" dans le projet "demo" et dans le projet "alt-demo"
 
 ```sh
-$ openstack role list --user admin --project demo
+*$ openstack role list --user admin --project demo
 +----------------------------------+-------+---------+-------+
 | ID                               | Name  | Project | User  |
 +----------------------------------+-------+---------+-------+
 | 76816e40d9d44200b85b98a9326fcb61 | admin | demo    | admin |
 +----------------------------------+-------+---------+-------+
-$ openstack role list --user admin --project alt_demo
+*$ openstack role list --user admin --project alt_demo
 +----------------------------------+-------+----------+-------+
 | ID                               | Name  | Project  | User  |
 +----------------------------------+-------+----------+-------+
@@ -790,7 +790,7 @@ $ openstack role list --user admin --project alt_demo
 ##Keystone - Policy
 Tandis que le user demo a le role member dans le projet demo
 ```sh
-$ openstack role list --user demo --project demo
+*$ openstack role list --user demo --project demo
 +----------------------------------+-------------+---------+------+
 | ID                               | Name        | Project | User |
 +----------------------------------+-------------+---------+------+
@@ -812,7 +812,7 @@ La notion __d'endpoint__ :
 #Openstack
 ##Keystone - Catalog
 ```sh
-$ openstack endpoint list
+*$ openstack endpoint list
 +----------------------------------+-----------+--------------+----------------+
 | ID                               | Region    | Service Name | Service Type   |
 +----------------------------------+-----------+--------------+----------------+
@@ -828,7 +828,7 @@ $ openstack endpoint list
 #Openstack
 ##Keystone - Catalog
 ```sh
-$ openstack endpoint show keystone
+*$ openstack endpoint show keystone
 +--------------+-----------------------------------+
 | Field        | Value                             |
 +--------------+-----------------------------------+
@@ -860,7 +860,7 @@ La notion de token :
 #Openstack
 ##Keystone - Token
 ```sh
-$ openstack token issue --os-username admin --os-project-name admin --os-auth-url http://localhost:5000/v2.0 
+*$ openstack token issue --os-username admin --os-project-name admin --os-auth-url http://localhost:5000/v2.0 
 Password: 
 +------------+----------------------------------+
 | Field      | Value                            |
@@ -923,7 +923,7 @@ Ainsi l'URL de keystone sera souvent utilisée comme __point d'entrée__ vers un
 
 Par exemple, ce sont les seuls éléments nécéssaires dans nova pour lister ses VMs :
 ```sh
-$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ list
+*$ nova --os-username demo --os-password labo --os-tenant-name demo --os-auth-url http://192.168.122.241:5000/ list
 ```
 
 ---
@@ -968,7 +968,7 @@ Plusieurs propriétés peuvent être affectées à une image :
 - Publique ou privée;
 
 ```sh
-$ glance image-list
+*$ glance image-list
 +--------------------------------------+---------------------------------+
 | ID                                   | Name                            |
 +--------------------------------------+---------------------------------+
@@ -982,7 +982,7 @@ $ glance image-list
 ##Glance
 
 ```sh
-$ glance image-show ef6f18a3-886e-4eef-a65e-ddf5c6698d16
+*$ glance image-show ef6f18a3-886e-4eef-a65e-ddf5c6698d16
 +------------------+--------------------------------------+
 | Property         | Value                                |
 +------------------+--------------------------------------+
@@ -1032,7 +1032,7 @@ On peut aussi utiliser des formats de Containers (disk+metadata) :
 Glance écoute sur le port 9292, comme nous stipulé dans le catalogue de service Keystone :
 
 ```sh
-$ openstack endpoint show glance
+*$ openstack endpoint show glance
 +--------------+----------------------------------+
 | Field        | Value                            |
 +--------------+----------------------------------+
@@ -1107,7 +1107,7 @@ Nova est le composant central d'Openstack.  Il est utilisé pour :
 Comme tous les composants Opensatck, nova expose une API REST :
 
 ```sh
-$ openstack endpoint show nova
+*$ openstack endpoint show nova
 +--------------+------------------------------------------------+
 | Field        | Value                                          |
 +--------------+------------------------------------------------+
@@ -1170,7 +1170,7 @@ Ces flavor caractérise une VM en spécifiant, par falvor :
 Typiquement, un cloud openstack contiendra des flavor prédéfinis que l'on peut lister via l'API :
 
 ```sh
-$ nova flavor-list
+*$ nova flavor-list
 +----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
 | ID | Name      | Memory_MB | Disk | Ephemeral | Swap | VCPUs | RXTX_Factor | Is_Public |
 +----+-----------+-----------+------+-----------+------+-------+-------------+-----------+
@@ -1189,7 +1189,7 @@ $ nova flavor-list
 Mais rien ne nous empeche de créer nos propres flavors :
 
 ```sh
-$ nova flavor-create myflavor auto 1024 10 16 
+*$ nova flavor-create myflavor auto 1024 10 16 
 +--------------------------------------+----------+-----------+------+-----------+------+-------+-------------+-----------+
 | ID                                   | Name     | Memory_MB | Disk | Ephemeral | Swap | VCPUs | RXTX_Factor | Is_Public |
 +--------------------------------------+----------+-----------+------+-----------+------+-------+-------------+-----------+
@@ -1204,7 +1204,7 @@ $ nova flavor-create myflavor auto 1024 10 16
 Une fois que l'on a notre flavor et notre image, on peut demander à nova de démarrer une VM :
 
 ```sh
-$ nova boot --flavor m1.tiny --image cirros-0.3.4-x86_64-uec vm1
+*$ nova boot --flavor m1.tiny --image cirros-0.3.4-x86_64-uec vm1
 ```
 
 Grâce au flavor spécifé, nova connaitra les contrainte de notre VM. Il pourra la placer sur le host adéquat :
@@ -1244,18 +1244,18 @@ Ces filtres peuvent être paramétrés pour supporter l'oversubscription;
 Pour l'utilisateur, il existe des moyens de contraindre le scheduler si les filtres adéquats sont activés. Par exemple :
 - Different(Same)HostFilter : 
 ```sh
-$ nova boot --image cedef40a-ed67-4d10-800e-17455edce175 --flavor 1 \
+*$ nova boot --image cedef40a-ed67-4d10-800e-17455edce175 --flavor 1 \
   --hint different_host=a0cf03a5-d921-4877-bb5c-86d26cf818e1 \
   --hint different_host=8c19174f-4220-44f0-824a-cd1eeef10287 server-1
 ```
 - ServerGroup(Anti)AffinityFilter : 
 ```sh
-$ nova server-group-create --policy anti-affinity group-1
-$ nova boot --image IMAGE_ID --flavor 1 --hint group=SERVER_GROUP_UUID server-1
+*$ nova server-group-create --policy anti-affinity group-1
+*$ nova boot --image IMAGE_ID --flavor 1 --hint group=SERVER_GROUP_UUID server-1
 ```
 - JsonFilter :
 ```sh
-$ nova boot --image 827d564a-e636-4fc4-a376-d36f7ebe1747 \
+*$ nova boot --image 827d564a-e636-4fc4-a376-d36f7ebe1747 \
   --flavor 1 --hint query='[">=","$free_ram_mb",1024]' server1
 ```
 ---
@@ -1271,7 +1271,7 @@ Par exemple :
 
 l'admin peut également utiliser des availability-zone pour exposer ses host-aggregate via l'API à l'utilisateur :
 ```sh
-$ nova boot --image IMAGE_ID --flavor 1 --availability-zone az_name server1
+*$ nova boot --image IMAGE_ID --flavor 1 --availability-zone az_name server1
 ```
 
 ---
@@ -1283,14 +1283,14 @@ Maintenant que ma VM est démarrée, je souhaite y accèder.
 Souvent, on utilise une image cloud, paramétrée pour créer un user dont le mot de passe est donné dans la console, et accèssible via nova : 
 
 ```sh
-$ nova console-log vm1
+*$ nova console-log vm1
 ...
 login as 'cirros' user. default password: 'cubswin:)'. use 'sudo' for root.
 ```
 
 On peut alors utiliser un accès vnc à cette VMs : 
 ```sh
-$ nova get-vnc-console vm1 novnc
+*$ nova get-vnc-console vm1 novnc
 +-------+--------------------------------------------------------------------------------------+
 | Type  | Url                                                                                  |
 +-------+--------------------------------------------------------------------------------------+
@@ -1314,7 +1314,7 @@ Une alternative à l'accès console est l'accès via ssh. Mais pour l'activer, i
 Regardons quelle IP est attribuée à notre VM après son boot:
 
 ```sh
-$ nova show vm1
+*$ nova show vm1
 +--------------------------------------+----------------------------------------------------------------+
 | Property                             | Value                                                          |
 +--------------------------------------+----------------------------------------------------------------+
@@ -1337,7 +1337,7 @@ Ainsi, Openstack introduit le concept de floating IP :
 
 On va alors commencer par s'attribuer une floating-ip : 
 ```sh
-$ nova floating-ip-create
+*$ nova floating-ip-create
 +----+------------+-----------+----------+--------+
 | Id | IP         | Server Id | Fixed IP | Pool   |
 +----+------------+-----------+----------+--------+
@@ -1348,8 +1348,8 @@ $ nova floating-ip-create
 Avant de l'attribuer à une VM pour la rendre accessible depuis le réseau public (internet ou autre pour les cloud internes)
 
 ```sh
-$ nova floating-ip-associate vm1 172.24.4.1
-$ nova floating-ip-list
+*$ nova floating-ip-associate vm1 172.24.4.1
+*$ nova floating-ip-list
 +----+------------+--------------------------------------+----------+--------+
 | Id | IP         | Server Id                            | Fixed IP | Pool   |
 +----+------------+--------------------------------------+----------+--------+
@@ -1367,7 +1367,7 @@ Je dois manipuler les ouvertures de flux via l'API : il s'agit de l'API nova "se
 
 Chaque VM appartient à un ou plusieurs security group : 
 ```sh
-$ nova show vm1
+*$ nova show vm1
 +--------------------------------------+----------------------------------------------------------------+
 | Property                             | Value                                                          |
 +--------------------------------------+----------------------------------------------------------------+
@@ -1385,19 +1385,19 @@ Les security group fonctionnent sur le principe des white-list : tout traffic en
 Nous allons donc placer notre VM dans un security-group authorisant l'accès SSH :
 
 ```sh
-$ nova secgroup-create frontend-ssh frontend-ssh
+*$ nova secgroup-create frontend-ssh frontend-ssh
 +----+--------------+--------------+
 | Id | Name         | Description  |
 +----+--------------+--------------+
 | 2  | frontend-ssh | frontend-ssh |
 +----+--------------+--------------+
-$ nova secgroup-add-rule frontend-ssh tcp 22 22 0.0.0.0/0
+*$ nova secgroup-add-rule frontend-ssh tcp 22 22 0.0.0.0/0
 +-------------+-----------+---------+-----------+--------------+
 | IP Protocol | From Port | To Port | IP Range  | Source Group |
 +-------------+-----------+---------+-----------+--------------+
 | tcp         | 22        | 22      | 0.0.0.0/0 |              |
 +-------------+-----------+---------+-----------+--------------+
-$ nova add-secgroup vm1 frontend-ssh
+*$ nova add-secgroup vm1 frontend-ssh
 ```
 
 ---
@@ -1411,14 +1411,14 @@ J'ai :
 je peux accèder à ma VM en ssh :
 
 ```sh
-$ ssh cirros@172.24.4.1
+*mat@enssat$ ssh cirros@172.24.4.1
 cirros@172.24.4.1's password: 
-$ 
+*cirros@vm1$
 ```
 
 Mais je ne peux pas la pinger :
 ```sh
-$ ping 172.24.4.1
+*$ ping 172.24.4.1
 PING 172.24.4.1 (172.24.4.1) 56(84) bytes of data.
 ping: sendmsg: Operation not permitted
 ```
@@ -1435,7 +1435,7 @@ nova dispose d'un API pour gérer les clés d'accès au VMs : il s'agit des nova
 Avant de pouvoir attribuer une clé d'accès à une VM, il faut d'abord la générer :
 
 ```sh
-$ ssh-keygen -t rsa -f cloud.key
+*$ ssh-keygen -t rsa -f cloud.key
 ```
 
 Cette commande génère deux fichiers : 
@@ -1444,7 +1444,7 @@ Cette commande génère deux fichiers :
 
 On peut maintenant créer notre keypair : 
 ```sh
-$ nova keypair-add --pub-key ./cloud.key.pub --key-type ssh cloud
+*$ nova keypair-add --pub-key ./cloud.key.pub --key-type ssh cloud
 ```
 ---
 #Openstack
@@ -1463,13 +1463,13 @@ Mais cela a des inconvénients, car en cas de rebuild de la VM, ce fichier sera 
 Il conviendra donc de creer la keypair avant de booter la VM : 
 
 ```sh
-$ nova boot --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+*$ nova boot --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
 ```
 
 Une fois qu'on a attribué une floating-IP à la VM et que la VM est placé dans un security-group qui authorise l'accès ssh, on peut s'y connecter de l'exterieur via le certificat : 
 
 ```sh
- $ ssh -i cloud.key cirros@172.24.4.1
+ *$ ssh -i cloud.key cirros@172.24.4.1
  $
 ```
 
@@ -1495,7 +1495,7 @@ Accès par le réseau :
 - au boot, cloud-init envoie une requète à une IP spéciale : 169.254.169.254
 - depuis une VM, on peut retrouver ces infos :
 ```sh
-$ curl http://169.254.169.254/latest/
+*$ curl http://169.254.169.254/latest/
 ```
 
 Accès par configdrive :
@@ -1504,7 +1504,7 @@ Accès par configdrive :
 - peut être utile si la VM n'a pas de dhcp, donc pas de réseau;
 - il faut spécifier l'utilisation du configdrive lors du boot de la VM : 
 ```sh
-$ nova boot --config-drive true --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+*$ nova boot --config-drive true --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
 ```
 
 ---
@@ -1513,7 +1513,7 @@ $ nova boot --config-drive true --flavor 1 --image cirros-0.3.4-x86_64-uec --key
 
 Voyons ce qu'il y a dans les fichiers utilisés par cloud-init : 
 ```sh
-$ curl http://169.254.169.254/latest/
+*$ curl http://169.254.169.254/latest/
 meta-data/
 user-data/
 ```
@@ -1530,7 +1530,7 @@ Beaucoup de choses peuvent être paramétrée par l'utilisateur gràce à la sec
 - modification de fichiers;
 -...
 ```sh
-$ cat cloud-config.yaml 
+*$ cat cloud-config.yaml 
 #cloud-config
 password: secret
 chpasswd: { expire: False }
@@ -1541,7 +1541,7 @@ write_files:
   - content: |
     Hello World
     path: /tmp/demo-write-files.txt
-$ nova boot --user-data ./cloud-config .yaml --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+*$ nova boot --user-data ./cloud-config .yaml --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
 ```
 
 
@@ -1551,7 +1551,7 @@ $ nova boot --user-data ./cloud-config .yaml --flavor 1 --image cirros-0.3.4-x86
 
 Si l'image de la VM n'inclue pas cloud-init, il est toujours possible d'y injecter des fichiers à son instanciation :
 ```sh
-$ nova boot --file /tmp/dst.txt=/tmp/src.txt --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
+*$ nova boot --file /tmp/dst.txt=/tmp/src.txt --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
 ```
 
 ---

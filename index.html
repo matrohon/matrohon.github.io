@@ -9,7 +9,12 @@
     <script src="remark-latest.min.js">
     </script>
     <script>
-      var slideshow = remark.create({sourceUrl: 'source.md'});
+      var slideshow = remark.create({
+          sourceUrl: 'source.md',
+          highlightStyle: 'monokai',
+          highlightSpans: true,
+          highlightLines: true
+        });
     </script>
   </body>
 </html>
