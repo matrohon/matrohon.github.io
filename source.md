@@ -6,20 +6,25 @@ class: center, middle
 #Présentation
 Mathieu Rohon
 
-OrangeLabs
+Orange Labs
 
 Contributeur Openstack depuis 2012
 
 Principale actvité : Openstack/Neutron
 
----
-# Scope du cours
+Sources :
+-  https://github.com/Osones/OpenStack-Formations/
+-  https://github.com/arnaudmorin/OpenStack-Formations/
 
-- Virtualisation
-- Cloud Computing/IaaS
-- Datacenter Virtuel
-- __Opensource__
-- __Openstack__
+Licences Creative Commons BY-SA 4.0
+
+
+---
+# Objectif du cours
+
+- Comprendre ce qu'on entend pas Cloud Computing
+- Connaitre les technologie de Virtualisation utilisées dans le Cloud
+- Apprendre à gérer son Datacenter Virtuel Openstack
 
 ---
 name: agenda
@@ -47,13 +52,20 @@ name: cloud
 #Cloud computing
 ##Avant le Cloud computing
 
+Pour comprendre l'attrait du cloud computing étudier les étapes nécéssaires pour mettre en production une application __sans cloud computing__
+
+---
+#Cloud computing
+##Avant le Cloud computing
+
+
 Pour assurer son bon fonctionnement, une application doit maitriser son environnement :
 - resources physiques (CPU/RAM);
 - stockage (disque, backup);
 - OS/Librairies/Soft sur chaque serveur;
 - accès réseau (IP Publique, firewall, load balancer);
 
-Chaque application nécéssitera donc un environnement dédié. 
+Chaque application nécéssitera donc un environnement dédié.
 
 ---
 #Cloud computing
@@ -85,60 +97,96 @@ Les datacenter deviennent alors une collection de serveurs sous-exploités!!
 Grâce au cloud computing, on va __flexibiliser__ l'accès aux resources, et __optimiser__ leur utilisation;
 
 [Definition Wikipedia](https://en.wikipedia.org/wiki/Cloud_computing) :
-- On demand : utlisation et facturation uniquement le temps nécéssaire.
-- Shared processing resources and data : mutualisation des infrastructures;
+- On demand : 
+    - instanciation des resources très rapide;
+    - facturation uniquement le temps nécéssaire;
+- Shared processing resources and data : mutualisation des infrastructures pour optimiser les couts;
 
 Au lieu d'avoir une infrastructure physique par projet, chaque projet va louer son infrastructure chez un prestataire tiers (interne ou externe à l'entreprise) :
-- pas de compétences nécéssaire d'administration de l'infrastructure dans le projet;
+- pas de compétences nécéssaires d'administration de l'infrastructure dans le projet;
 - prévision des couts "pay as you go";
 - adaptation rapide en cas de pic/baisse d'activité du projet;
 
 ---
 #Cloud computing
-##Concept \*_as_a_Service
-* Service en ligne (__Cloud__);
-* Privilégie la facturation à l'usage;
-* Accessible via des APIs;
 
---
-count: false
+On parlera de différents types de Cloud :
+- public : l'infrastructure et les données sont hébergées par un opérateur tiers :
+    - Amazon, Azure, Google...;
+- privée : le cloud est géré en interne, souvent par un service dédié;
+- hybride : le cloud privé loue des resources supplémentaire à un cloud public pour :
+   - un pic de charge;
+   - une opération temporaire;
+   - des tests...
+
+---
+#Cloud computing
+##Concept \*_as_a_Service
+Dans le monde du cloud computing, on entend souvent parler du concept * As A Service. on peut le résumer par un service :
+* en ligne (__Cloud__);
+* qui privilégie la facturation à l'usage;
+* accessible via des APIs;
+
+---
+#Cloud computing
+##Concept \*_as_a_Service
 
 Différents types de \*aaS :
-* Storage (__STaaS__) : Swift
-    - offres commerciales : Google Drive, Amazon S3, Dropbox
+--
+count: false
+
+* Storage (__STaaS__) : Offrir du stockage en ligne;
+    - solution pour un déploiement interne : __Openstack__ Swift, Ceph, NetApp, EMC...
+    - offres commerciales en ligne : Google Drive, Amazon S3, Dropbox
 
 --
 count: false
 
-* Infra (__IaaS__) : Openstack, Cloudstack, VMWare
-    - offres commerciales : Google Compute, Amazon EC2, Azure, Cloudwatt
+* Infra (__IaaS__) : Offrir de la Ram, du CPU et des I/O pour des datacenter virtuels;
+    - solution pour un déploiement interne : __Openstack__ Nova, Cloudstack, VMWare...
+    - offres commerciales en ligne : Google Compute, Amazon EC2, Azure, Cloudwatt
 
 --
 count: false
 
-* Platform (__PaaS__) : Cloud foundry
-    - offres commerciales : Heroku, Scalingo, Docker
+* Platform (__PaaS__) : Offrir un espace de stockage pour des applications server;
+    - solution pour un déploiement interne : Cloud foundry, Docker, Tomcat (server J2EE)
+    - offres commerciales : Heroku, Scalingo
 
---
-count: false
+---
+#Cloud computing
+##Concept \*_as_a_Service
 
-* Software (__SaaS__) : ?
+* Software (__SaaS__) : Offrir une éxecution d'application personnalisée en ligne;
+    - solution pour un déploiement interne : Etherpad, Editeur logiciel fournissant une offre __en ligne__
     - offres commerciales : Google Doc, Office 365, Photoshop
 
 
 --
 count: false
-Et bien d'autres (VPNaas, DBaas...)
-
+Et bien d'autres 
+- Networkaas;
+- VPNaas;
+- DBaas;
+- ...;
 
 ---
 #Cloud computing
-##Rationnaliser l'IT
+##Concept \*_as_a_Service
+
+<p style="text-align:center;"><img src="./img/cloud.png" width="600px"/></p>
+
+---
+#Cloud computing
+##Flexibiliser l'IT
+
+Dans le domaine du cloud, la flexibilité est primordiale.
 
 Si on s'appuie sur des éléments physiques, il est très difficile d'obtenir la flexibilité.
 Mettre a disposition un serveur physique nécéssite des étapes manuelles.
 
-Côté réseau et stockage, des technologie de virtualisation existent et peuvent assez facilement être pilotée via des API en mode aaS :
+Côté réseau et stockage, des technologies de virtualisation existent et peuvent assez facilement être pilotée via des API en mode aaS :
+
 - Réseau virtuel : segmentation logiciel
 - Stockage virtuel : NFS, cifs (file), LVM (block)
 
@@ -195,15 +243,14 @@ La solution basique pour créer une VM consiste donc à émuler son matériel :
 
 Mais dans le CLoud Computing ce qui va nous intéresse c'est d'isoler les VMs, et non d'émuler du matériel.
 
-
-Si ma VM connait le matériel du HOST, je n'ai plus les problèmes de performance?
+Si ma VM connait le CPU du HOST, je n'ai plus les problèmes de performance?
 
 ---
 #Virtualisation
 ##L'émulation iso-matériel
 
 Malheureusement __non__ :
-- l'OS du HOST cherche a executer des instructions privilégiées sur le CPU (protected mode, Ring 0), mais n'y est pas authorisé en tant que logiciel (Ring 3)
+- l'OS du GUEST cherche a executer des instructions privilégiées sur le CPU (protected mode, Ring 0), mais n'y est pas authorisé en tant que logiciel (Ring 3)
 
 <p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Priv_rings.svg/633px-Priv_rings.svg.png" width="300px;"/></p>
 - Pas d'accès direct au matériel donc :
@@ -212,15 +259,15 @@ Malheureusement __non__ :
 
 ---
 #Virtualisation
-##L'émulation iso-matériel aidée
+##La paravirtualisation
 
 La paravirtualisation (Xen):
 - les Guests sont au courant qu'ils sont virtualisés;
 - au lieu d'appeler les instructions couteuses à émuler, ils vont demander à l'Hyperviseur de les executer à leur place;
-- VirtualBox guest additions?
-
 
 <p style="text-align:center;"><img src="http://www.ibm.com/developerworks/library/l-virtio/figure1.gif" width="600px;"/></p>
+
+- l'inconvénient : il faut modifier le kernel du guest;
 
 ---
 #Virtualisation
@@ -235,8 +282,57 @@ Ces améliorations matérielles sont nativement intégrées dans les équipement
 
 ---
 #Virtualisation
+##Les containers
+
+Pour éviter l'éumlation couteuse, on peut également partager le noyau, et donc l'accès au matériel.
+<p style="text-align:center;"><img src="./img/isolateur.png" width="400px;"/></p>
+
+C'est l'angle pris par les __container LXC__; chaque application s'exécute dans un environnement contraint par :
+- les cgroup : controle l'allocation des resources;
+- les namespaces : controle l'isolation des container/application;
+
+Ces deux technologies sont également au coeur des technologies __docker__;
+
+---
+#Virtualisation
+##Les containers
+
+Avantage :
+- très performants : pas d'émulation;
+
+Inconvénients :
+- ne marche que pour des environnements linux;
+- le partage du kernel isole beaucoup moins;
+- problème de sécurité;
+
+---
+#Virtualisation
+#Résumé
+
+Dans le monde IaaS, on utilisera des VMs permettant de créer des datacenter virtuel;
+
+On s'appuie désormais sur des hyperviseurs optimisés, tirant partie des avancées matérielles rendant un ratio isolation/performance adéquat :
+- QEMU/KVM;
+- XEN;
+- VMWare ESX;
+
+---
+#Virtualisation
 ##Créer ses VMs
-On peut directement le faire avec kvm :
+On peut directement le faire avec kvm.
+
+Il faut d'abord s'assurer que notre processeur supporte la virtualisation :
+```bash
+*$ 
+```
+Et que le module noyau kvm est chargé :
+```bash
+*$ 
+```
+---
+#Virtualisation
+##Créer ses VMs
+On lance alors une VM en créant un disque pour notre OS, et stipulant la quantité de mémoire qu'on veut lui allouer :
 ```bash
 *$ qemu-img create -f qcow2 /tmp/img.qcow2 6G
 Formatting '/tmp/img.qcow2', fmt=qcow2 size=6442450944 encryption=off cluster_size=65536 lazy_refcounts=off refcount_bits=16
@@ -255,7 +351,15 @@ mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86
 
 ---
 #Virtualisation
+##Créer ses VMs
+
+Beaucoup d'options peuvent être passées en paramètre de kvm : 
+---
+#Virtualisation
 ##Libvirt
+
+gère l'environnemnt de la VM;
+
 Plusieurs technologies de virtualisation existent (KVM, Xen, VirtualBox, LXC...).
 
 Il est donc nécéssaire de créer une API pour abstraire ces technologies pour des applications de managment de VM. c'est le but du projet [libvirt](https://libvirt.org/html/index.html)
