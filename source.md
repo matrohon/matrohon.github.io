@@ -15,6 +15,7 @@ Principale actvité : Openstack/Neutron
 Sources :
 -  https://github.com/Osones/OpenStack-Formations/
 -  https://github.com/arnaudmorin/OpenStack-Formations/
+-  http://docs.openstack.org
 
 Licences Creative Commons BY-SA 4.0
 
@@ -22,24 +23,33 @@ Licences Creative Commons BY-SA 4.0
 ---
 # Objectif du cours
 
-- Comprendre ce qu'on entend pas Cloud Computing
-- Connaitre les technologie de Virtualisation utilisées dans le Cloud
-- Apprendre à gérer son Datacenter Virtuel Openstack
+- Comprendre ce qu'on entend pas __Cloud Computing__
+- Connaitre les technologies de __Virtualisation__ utilisées dans le Cloud Computing
+- Apprendre à gérer son Datacenter Virtuel __Openstack__
 
 ---
 name: agenda
 # Agenda
 
 1. [Cloud Computing](#cloud)
+    1. Avant le cloud
+    1. Definition
+    1. *aaS
 1. [Virtualisation](#virtualisation)
+    1. La machine virtuelle et l'hyperviseur
+    1. L'émulation
+    1. La paravirtualisation
+    1. Les containers
+    1. Créer/Gérer ses VMs
 1. [Openstack](#openstack)
+    1. Introduction
     1. [Keystone](#keystone)
     1. [Glance](#glance)
     1. [Nova](#nova)
-    1. Neutron
     1. Cinder
-    1. Swift
+    1. Neutron
     1. Heat
+    1. Swift
     1. CI/CD Openstack
 
 ---
@@ -52,7 +62,7 @@ name: cloud
 #Cloud computing
 ##Avant le Cloud computing
 
-Pour comprendre l'attrait du cloud computing étudier les étapes nécéssaires pour mettre en production une application __sans cloud computing__
+Pour comprendre l'attrait du cloud computing, étudions les étapes nécéssaires pour mettre en production une application __sans cloud computing__
 
 ---
 #Cloud computing
@@ -71,7 +81,7 @@ Chaque application nécéssitera donc un environnement dédié.
 #Cloud computing
 ##Avant le Cloud computing
 
-Pour les petites entreprises sans service IT, le développeur d'application doit se transformer en admin système/réseau/sotackage pour déployer son environnement.
+Pour les petites entreprises sans service IT, le développeur d'application doit se transformer en admin système/réseau/stockage pour déployer son environnement.
 
 Dans de plus grosses entreprises, le développeur d'application passera par les étapes suivantes :
 
@@ -89,7 +99,7 @@ On finit souvent par avoir un environnement surdimensionné (CPU/RAM/Disk) :
 - volontairement : pour ne pas avoir à le modifier en cas de forte charge de l'application;
 - involontairement : on utilise le matériel sourcé par le département IT/Réseau/Stockage, qui ne correspond pas forcément au besoin (trop de CPU/RAM/Disk)
 
-Les datacenter deviennent alors une collection de serveurs sous-exploités!!
+Les datacenter deviennent alors une collection de __serveurs sous-exploités__ et donc __couteux__!!
 
 ---
 #Cloud computing
@@ -209,7 +219,7 @@ name: virtualisation
 - les VMs sont __isolées du host__ et n'ont donc pas accès au matériel;
 - nécéssite d'émuler le matériel (CPU/RAM/IO/GPU)
 
-<p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Diagramme_ArchiEmulateur.png" width="400px"/></p>
+<p style="text-align:center;"><img src="./img/Diagramme_ArchiEmulateur.png" width="400px"/></p>
 
 ---
 #Virtualisation
@@ -220,7 +230,7 @@ Historiquement, il existe 2 types d'hyperviseurs :
 - type 1 : l'hyperviseur est à la place de l'OS (VMWare ESXi, XEN)
 - type 2 : l'hyperviseur tourne comme un logiciel sur un OS existant (VirtualBox, QEMU)
 
-<p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Hyperviseur.png" width="400px"/></p>
+<p style="text-align:center;"><img src="./img/Hyperviseur.png" width="400px"/></p>
 
 - type hybride : l'hyperviseur tourne dans le noyau (module linux) de l'OS existant (kvm)
 ---
@@ -252,22 +262,10 @@ Si ma VM connait le CPU du HOST, je n'ai plus les problèmes de performance?
 Malheureusement __non__ :
 - l'OS du GUEST cherche a executer des instructions privilégiées sur le CPU (protected mode, Ring 0), mais n'y est pas authorisé en tant que logiciel (Ring 3)
 
-<p style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Priv_rings.svg/633px-Priv_rings.svg.png" width="300px;"/></p>
+<p style="text-align:center;"><img src="./img/rings.png" width="300px;"/></p>
 - Pas d'accès direct au matériel donc :
     - Pas d'accès performant à la RAM (chipset MMU): nécéssite l'émulation de ce chipset par le HOST
     - Pas d'accès performant (DMA) aux équipements d'entée/sortie (disque, carte réseau...)
-
----
-#Virtualisation
-##La paravirtualisation
-
-La paravirtualisation (Xen):
-- les Guests sont au courant qu'ils sont virtualisés;
-- au lieu d'appeler les instructions couteuses à émuler, ils vont demander à l'Hyperviseur de les executer à leur place;
-
-<p style="text-align:center;"><img src="http://www.ibm.com/developerworks/library/l-virtio/figure1.gif" width="600px;"/></p>
-
-- l'inconvénient : il faut modifier le kernel du guest;
 
 ---
 #Virtualisation
@@ -282,6 +280,21 @@ Ces améliorations matérielles sont nativement intégrées dans les équipement
 
 ---
 #Virtualisation
+##La paravirtualisation
+
+La paravirtualisation (Xen):
+- les Guests sont au courant qu'ils sont virtualisés;
+- au lieu d'appeler les instructions couteuses à émuler, ils vont demander à l'Hyperviseur de les executer à leur place;
+
+<p style="text-align:center;"><img src="./img/figure1.gif" width="500px;"/></p>
+
+- Avantage : permet de se passer des amélioration matérielles (VT etc..) en étant performant -> succes de __Xen__ au début de la virtualisation;
+- Inconvénient : il faut modifier le kernel du guest;
+
+Cette technologie est toujours très utilisée notamment pour les driver d'I/O linux avec virtio;
+
+---
+#Virtualisation
 ##Les containers
 
 Pour éviter l'éumlation couteuse, on peut également partager le noyau, et donc l'accès au matériel.
@@ -289,7 +302,7 @@ Pour éviter l'éumlation couteuse, on peut également partager le noyau, et don
 
 C'est l'angle pris par les __container LXC__; chaque application s'exécute dans un environnement contraint par :
 - les cgroup : controle l'allocation des resources;
-- les namespaces : controle l'isolation des container/application;
+- les namespaces : controle l'isolation des containers/applications;
 
 Ces deux technologies sont également au coeur des technologies __docker__;
 
@@ -297,8 +310,10 @@ Ces deux technologies sont également au coeur des technologies __docker__;
 #Virtualisation
 ##Les containers
 
-Avantage :
+Avantages :
 - très performants : pas d'émulation;
+- boot très rapide;
+- nécéssite moins de resources : la ram non utilisée réellement est disponible;
 
 Inconvénients :
 - ne marche que pour des environnements linux;
@@ -307,36 +322,41 @@ Inconvénients :
 
 ---
 #Virtualisation
-#Résumé
+##Résumé
 
-Dans le monde IaaS, on utilisera des VMs permettant de créer des datacenter virtuel;
+Dans le monde IaaS, on utilisera des VMs permettant de créer des datacenter virtuels;
 
 On s'appuie désormais sur des hyperviseurs optimisés, tirant partie des avancées matérielles rendant un ratio isolation/performance adéquat :
 - QEMU/KVM;
 - XEN;
 - VMWare ESX;
 
+Les containers sont envisagés dans des environnements plus permissifs; on voit de plus en plus de containers dans des VMs (Openstack Magnum)!
+
 ---
 #Virtualisation
 ##Créer ses VMs
-On peut directement le faire avec kvm.
+On peut directement le faire avec qemu/kvm.
 
 Il faut d'abord s'assurer que notre processeur supporte la virtualisation :
 ```bash
-*$ 
+*$ grep -e vmx -e ept /proc/cpuinfo
+flags : ... ept ... vmx ...
 ```
 Et que le module noyau kvm est chargé :
 ```bash
-*$ 
+*$ lsmod | grep kvm
+kvm_intel             167936  6
+kvm                   528384  1 kvm_intel
 ```
 ---
 #Virtualisation
 ##Créer ses VMs
-On lance alors une VM en créant un disque pour notre OS, et stipulant la quantité de mémoire qu'on veut lui allouer :
+On lance alors une VM en créant un disque pour notre OS :
 ```bash
 *$ qemu-img create -f qcow2 /tmp/img.qcow2 6G
 Formatting '/tmp/img.qcow2', fmt=qcow2 size=6442450944 encryption=off cluster_size=65536 lazy_refcounts=off refcount_bits=16
-*$ kvm -m 256 /tmp/img.qcow2
+*$ qemu-system-x86_64 -enable-kvm /tmp/img.qcow2
 ```
 
 --
@@ -346,84 +366,168 @@ count: false
 
 ```bash
 *$ ps -aux | grep kvm
-mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86_64 -enable-kvm -m 256 /tmp/img.qcow2
+mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86_64 -enable-kvm /tmp/img.qcow2
 ```
 
 ---
 #Virtualisation
 ##Créer ses VMs
 
-Beaucoup d'options peuvent être passées en paramètre de kvm : 
----
-#Virtualisation
-##Libvirt
+Beaucoup d'options peuvent être passées en paramètre de qemu/kvm pour :
+- attacher un cdrom/usb/netdev;
+- gérér l'orde de boot;
+- gérer l'environnement graphique;
+- gérer le nombre de cpu/ram;
+- ...
 
-gère l'environnemnt de la VM;
+une commande qemu ressemble plus souvent à :
+```sh
+*$ ps -aux | grep qemu
+libvirt+  6945  0.5  6.6 11990520 1086216 ?    Sl   Apr20   8:16 qemu-system-x86_64 -enable-kvm -name dev4 -S -machine pc-i440fx-2.5,accel=kvm,usb=off,vmport=off -cpu Haswell-noTSX -m 8000 -realtime mlock=off -smp 4,sockets=4,cores=1,threads=1 -uuid 47f8d918-4b81-4d64-b253-fd932de35d2d -no-user-config -nodefaults -chardev socket,id=charmonitor,path=/var/lib/libvirt/qemu/domain-dev4/monitor.sock,server,nowait \
+-mon chardev=charmonitor,id=monitor,mode=control -rtc base=utc,driftfix=slew -global kvm-pit.lost_tick_policy=discard -no-hpet -no-shutdown -global PIIX4_PM.disable_s3=1 -global PIIX4_PM.disable_s4=1 -boot strict=on -device ich9-usb-ehci1,id=usb,bus=pci.0,addr=0x6.0x7 -device ich9-usb-uhci1,masterbus=usb.0,firstport=0,bus=pci.0,multifunction=on,addr=0x6 \
+-device ich9-usb-uhci2,masterbus=usb.0,firstport=2,bus=pci.0,addr=0x6.0x1 -device ich9-usb-uhci3,masterbus=usb.0,firstport=4,bus=pci.0,addr=0x6.0x2 -device virtio-serial-pci,id=virtio-serial0,bus=pci.0,addr=0x5 -drive file=/data/vm/dev4.qcow2,format=qcow2,if=none,id=drive-virtio-disk0 -device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x7,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 -drive if=none,id=drive-ide0-0-0,readonly=on -device ide-cd,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0 -netdev tap,fd=26,id=hostnet0,vhost=on,vhostfd=28 \
+-device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:f1:e7:47,bus=pci.0,addr=0x3 -chardev pty,id=charserial0 -device isa-serial,chardev=charserial0,id=serial0 -chardev spicevmc,id=charchannel0,name=vdagent -device virtserialport,bus=virtio-serial0.0,nr=1,chardev=charchannel0,id=channel0,name=com.redhat.spice.0 -device usb-tablet,id=input0 i\
+-spice port=5900,addr=127.0.0.1,disable-ticketing,image-compression=off,seamless-migration=on -device qxl-vga,id=video0,ram_size=67108864,vram_size=67108864,vgamem_mb=16,bus=pci.0,addr=0x2 -device intel-hda,id=sound0,bus=pci.0,addr=0x4 -device hda-duplex,id=sound0-codec0,bus=sound0.0,cad=0 -chardev spicevmc,id=charredir0,name=usbredir -device usb-redir,chardev=charredir0,id=redir0 -chardev spicevmc,id=charredir1,name=usbredir -device usb-redir,chardev=charredir1,id=redir1 -device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x8 -msg timestamp=on
+```
 
-Plusieurs technologies de virtualisation existent (KVM, Xen, VirtualBox, LXC...).
-
-Il est donc nécéssaire de créer une API pour abstraire ces technologies pour des applications de managment de VM. c'est le but du projet [libvirt](https://libvirt.org/html/index.html)
-
-Libvirt permet de gérer ces VM et leur ecosystème (reseau, storage) en fournissant un API, exposable sur le réseau.
-
-Openstack ou d'autres outils de managment de VM peuvent alors utiliser cette API.
+Il est donc utile d'avoir des outils pour gérer cette complexité
 
 ---
 #Virtualisation
 ##Gestion des VMs
-Grace a des logiciels dédiés (virt-manager/libvirt, Virtual-box, VMWare Player...) la gestion de ces VMs est simplifiée.
 
-On peut rapidement créer une VM pour tester une nouvelle application sans compromettre l'hote. C'est très utile dans plusieurs cas :
-- faire tourner des services linux sous Windows/Mac;
-- installer des logiciels suspects;
-- tester des applications sans compromettre son environnement;
+Pour que la VM soit réellement utilisable, il faut prendre en compte son environnement :
+- réseau;
+- stockage;
+- image de base;
+- paramètres du host;
+- persistence de la VM;
 
---
-count: false
+Plusieurs logiciels permettent de gérer correctement les VMs : 
+- virt-manager/libvirt
+- Virtual-box
+- VMWare Player
+
+---
+#Virtualisation
+##Libvirt
+
+Plusieurs hyperviseurs existent sur le marché. Il peut donc être utile d'avoir un API commune pour abstraire les fonctions de ces hyperviseurs;
+
+C'est le rôle de [Libvirt](https://libvirt.org/) dont l'API permet de  :
+- gérer les VMs (domain dans le context libvirt)
+- gérer l'environnement de la VM sur le HOST :
+    - l'environnement réseau (NAT/Bridge, etc...)
+    - l'environnement de stockage sur le host
+    - ...
+Libvirt supporte plusieurs hyperviseurs (Qemu/KVM, Xen, LXC) et offre une interface d'accès à distance à l'hyperviseur;
+
+Deux outils peuvent notamment être utiliser pour piloter libvirt :
+- virsh : interface libvirt en ligne de comande fournie avec libvirt;
+- virt-manager : interface graphique;
+
+---
+#Virtualisation
+##Libvirt
+
+Démo Virt-manager/libvirt
 
 <p style="text-align:center;"><img src="./img/virt-manager.png" style="width: 400px;"/></p>
 
 ---
 #Virtualisation
-##Gestion des VMs
-Souvent, des TP d'applicatifs sont menés à partir de VM préconfigurées, incluant l'application installée sur la VM.
+##Cas d'usage des VMs locales
+On peut rapidement créer une VM pour tester une nouvelle application sans compromettre l'hote. C'est très utile dans plusieurs cas :
+- faire tourner des services linux sous Windows/Mac;
+- installer des logiciels suspects;
+- tester des applications sans compromettre son environnement;
 
-Ainsi on évite toute la partie configuration de l'application (plus pour l'admin) pour se concentrer sur son utilisation, toute en ayant une application par étudiant.
+Les vendeurs d'applications proposent souvent de tester leurs applicatif en proposant des VMs;
 
-Pour cela l'outil plébiscité semble être Vagrant.
-Chaque étudiant se verra remettre :
-- un fichier descriptif de la (des) VM;
-- un fichier servant de disque pour la (les) VM;
+Pour cela ils fournissent :
+- les disques des VMs nécéssaires;
+- un fichier descriptif de l'environnement nécéssaire pour chaque VM (ram/cpu etc..);
 
-Vagrant utilisera alors VirtualBox (ou Libvirt via plugin dedié) pour booter ses VMs telles qu'elles ont été définies dans le fichier descriptif.
+Des outils et formant propsent de déployer des VMs à partir de ce genre de resources :
+- Vagrant Files (VirtualBox, voir libvirt avec plugin)
+- OVA/OVF format pour VMWare
+- XML files pour libvirt;
 
 ---
 #Virtualisation
-##Gestion des VMs
-D'autres logiciels sont orientés vers la gestion de parc et d'hote de VMs : Proxmox, OVirt(libvirt).
+##Gestion de parc de VMs
 
-Ils permettent de rationnaliser davantage la gestion du parc de VMs en les placant de manière optimisée en fonction de leur contraintes.
+D'autres logiciels sont orientés vers la gestion de parc et de HOSTs de VMs :
+- Proxmox;
+- OVirt( qui utilisent libvirt);
+- VMWare VCenter;
+
+Ils permettent de rationnaliser davantage les resources pour les VMs en les placant de manière optimisée en fonction de leur contraintes.
+
+__On peut parler de Cloud Computing__ voir d'IaaS sur ces outils fournissent un API.
+
+---
+#Virtualisation
+##Gestion de parc de VMs
 
 Quelques pratiques communes pour l'optimisation de l'utilisation des resources du DC :
 
 - over-subscrition : le nombre de vCPU du total des VMs placée sur l'hyperviseur est supérieur au nombre de CPUs de l'hyperviseur;
 - ballooning : autoriser les VMs a dépasser la mémoire allouée pendant un bref instant;
-- copy-on-write sur les disques (ex QCOW2);
 
-Si le nombre de resources vient a manquer, on peut toujours ajouter un serveur physique au cluster, et migrer à chaud (live-migrate) les VMs qui en ont besoin. De même, les nouvelles VMs seront programmées (schedulées) sur ce nouveau serveur.
+Si le nombre de resources vient a manquer, on peut toujours ajouter un serveur physique au cluster de HOST, et migrer à chaud (live-migrate) les VMs.
+De même, les nouvelles VMs seront programmées (schedulées) sur ce nouveau serveur.
 
-Les resources physiques ne sont donc plus dédiées à un projet mais mutualisées pour plusieurs projets dans des DataCenter (DC) distants. C'est l'émergence du __Cloud Computing__
+---
+#Virtualisation
+##Gestion de parc de VMs
+
+Quelques pratiques communes pour l'optimisation de l'utilisation des resources du DC :
+
+- copy-on-write sur les disques (ex QCOW2) :
+
+<p style="text-align:center;"><img src="./img/SchemaCOW.png" style="width: 400px;"/></p>
+
+```bash
+*$ qemu-img create -b debian-8.3.0.BASE.qcow2 -f qcow2 apache.qcow2 10G
+Formatting 'apache.qcow2', fmt=qcow2 size=10737418240 backing_file=debian-8.3.0.BASE.qcow2 encryption=off cluster_size=65536 lazy_refcounts=off refcount_bits=16
+*$ ls -lha apache.qcow2
+-rw-r--r-- 1 root root 193K Apr 21 16:09 apache.qcow2
+```
+
+---
+#Virtualisation
+
+La viryualisation nous permet donc : 
+- d'optimser les resources dans le Datacenter;
+- tout en gardant :
+    - de la performance;
+    - de l'isolation et donc de la sécurité;
+
+En ajoutant une couche d'API pour fournir ses resources _à la demande__ et un manager pour  __ochestrer__ leur allocation, on obtient un Cloud IaaS.
 
 ---
 template: agenda
-
+name: openstack
 ###.right[Openstack]
 
 ---
 #Openstack
-##Du cadeau de noel au public Cloud
+##L'émergence du cloud computing
+
+A la fin des années 2010, Les services IT s'approprient l'utilisation du cloud computing pour optimiser leur resources.
+
+VMWare est le plus produit le plus mature et remporte donc un grand succès!
+
+De plus gros acteurs habitués des outils Opensource s'orientent vers des technologies plus ouvertes :
+- Amazon -> Xen;
+- La Nasa -> Eucalyptus (Open Core);
 
 Ces techniques de virtualistion sont utilisées depuis longtemps chez les gros hébergeurs (GAFA), pour leur propre besoins interne.
+
+---
+#Openstack
+##L'émergence du cloud computing public
 
 la légende :
 ```
@@ -433,35 +537,43 @@ tout le reste de l'année.
 Ils ont donc créé une offre publique de location de ses resources :
 c'est la naissance d'amazon EC2
 ```
-D'autres Cloud provider proposent des services accessibles à la demande, comme du storage et des software. Elles rencontrent un grand succès et on parle alors de \*aaS.
+D'autres Cloud provider proposent des services accessibles à la demande, comme du storage et des software. Ils rencontrent un grand succès.
 
 ---
 #Openstack
 ##La NASA
-De son côté, la NASA utilise un clone d'EC2 pour son cloud privé, géré par Eucalyptus. Mais sans grande satisfaction, car trop fermé et pas assez modulaire.
+De son côté, la NASA utilise un clone d'EC2 pour son cloud privé, géré par Eucalyptus. Mais sans grande satisfaction, car __trop fermé__ et pas assez modulaire.
 
-Beaucoup de déploiement de cloud IaaS s'oriente vers VMWare qui monopolise le marché.
-Un alternative Opensource est plus que nécéssaire pour concurrencer VMWare.
+Beaucoup de déploiements de cloud IaaS s'orientent vers VMWare VCenter qui monopolise le marché.
 
-La Nasa lance donc un nouveau cloud manager opensource, plus flexible, appélé Nova. Rackspace, un gros acteur de l'hébergement aux USA se joint à l'éffort pour creer Openstack.
-Très vite, il est décidé d'héberger le projet dans une fondation, afin d'en assurer l'indépendance, et de fédérer le plus d'entreprise.
+__Une alternative Opensource est plus que nécéssaire pour concurrencer VMWare et AWS EC2__.
 
-La fondation Openstack est alors créée et l'engouement est rapide.
+La Nasa lance donc un nouveau cloud manager opensource, plus flexible, appélé __Nova__. __Rackspace__, un gros acteur de l'hébergement aux USA se joint à l'éffort pour créer Openstack.
+Très vite, il est décidé d'héberger le projet dans une fondation, afin d'en assurer l'__indépendance__, et de __fédérer__ le plus d'entreprise.
 
-Une autre initiative Opensource voit également le jour : Cloudstack. Menée par Citrix, qui détiens également Xen, Cloudstack est actuellement hébergé par la fondation Apache.
+La __fondation Openstack__ est alors créée et l'engouement est rapide.
+
+Une autre initiative Opensource voit également le jour : __Cloudstack__. Menée par Citrix, qui détiens également Xen, Cloudstack est actuellement hébergé par la fondation Apache.
 
 ---
-name: openstack
 #Openstack
 ##Introduction
 But :
-- service de IaaS : découper un datacenter physique en datacenters virtuels, allouables à la demande, accessible par des API REST;
-- devenir la plateforme de Cloud Computing de référence;
-- pour les grand déploiments (CERN, Nectar...);
+- service de IaaS : découper un datacenter physique en datacenters virtuels, allouables à la demande, accessibles par des API REST;
+- devenir la plateforme de Cloud Computing de référence permettant à des acteurs tiers de :
+    - concurrencer Amazon pour le cloud public;
+    - concurrencer VMWare pour le cloud privé;
+- pour les grands déploiments (CERN, Nectar...);
 - pour le cloud privé et public;
 - Interopérabilité des APIs;
 
-(schéma montrant la migration d'un cloud à l'autre)
+---
+#Openstack
+##L'utilité des API normées
+
+Pour les utilisateurs de Clouds, Openstack permet de changer de provider de cloud, sans changer les outils :
+
+<p style="text-align:center;"><img src="./img/interop.png" style="width: 600px;"/></p>
 
 ---
 #Openstack
@@ -469,6 +581,7 @@ But :
 - [4 open](https://wiki.openstack.org/wiki/Open) :
     - Open Source : no Open Core; no entreprise edition.
     - Open Design : Design Summit tous les 6 mois;
+
     - Open Development : public code reviews, public roadmaps;
     - Open Community : meritocracy, élections des Leader par les developpeurs;
 - faire vivre la communaté; (communication)
@@ -510,7 +623,7 @@ source : [activity.openstack.org](http://activity.openstack.org/dash/browser/)
 #Openstack
 ##Le code
 - développé en python (2.7 + compatibilité python 3);
-- avec des regles de codage fortes (pep8)
+- avec des règles de codage fortes (pep8)
     - pour une meilleur maintenabilité;
     - pour une facilité d'adoption pour les newcomers;
 - avec un grande couverture de tests unitaires et fonctionnels;
@@ -522,7 +635,7 @@ source : [activity.openstack.org](http://activity.openstack.org/dash/browser/)
 #Openstack
 ##Historique
 
-(schéma...)
+<p style="text-align:center;"><img src="./img/history.png" style="width: 700px;"/></p>
 
 ---
 #Openstack
@@ -608,7 +721,7 @@ Il devenait trop difficile de déterminer quels projets devaient être "integrat
 #Openstack
 ##Architecture simplifiée
 
-<p style="text-align:center;"><img src="http://docs.openstack.org/juno/install-guide/install/apt/content/figures/1/a/common/figures/openstack_havana_conceptual_arch.png" style="width: 500px;"/></p>
+<p style="text-align:center;"><img src="./img/openstack_havana_conceptual_arch.png" style="width: 500px;"/></p>
 ---
 #Openstack
 ##Architecture operationnelle
@@ -619,7 +732,7 @@ Il devenait trop difficile de déterminer quels projets devaient être "integrat
 #Openstack
 ##Architecture physique classique
 
-<p style="text-align:center;"><img src="http://www.thoughtsoncloud.com/wp-content/uploads/2014/08/Basic-architecture-with-OpenStack-networking.png" style="width: 500px;"/></p>
+<p style="text-align:center;"><img src="img/Basic-architecture-with-OpenStack-networking.png" style="width: 500px;"/></p>
 
 - Cloud Controller node : composant central pour l'API, la DB, le server AMQP;
 - Compute node : héberge les VMs;
@@ -814,7 +927,7 @@ Keystone existe en deux versions d'API : v2 et v3. La v3 ajoute la gestion des d
 
 Keystone est composé de plusieurs sous parties :
 
-<p style="text-align:center;"><img src="http://allthingsopendotcom.files.wordpress.com/2014/07/keystone.png" style="width: 500px;"/></p>
+<p style="text-align:center;"><img src="img/keystone.png" style="width: 500px;"/></p>
 
 ---
 #Openstack
@@ -981,15 +1094,15 @@ Je peux utiliser le token aa521d73f8654911a181b964b01892f4 pour faire des requet
 #Openstack
 ##Keystone - Résumé
 http://lists.openstack.org/pipermail/openstack-dev/2016-April/091754.html
-<p style="text-align:center;"><img src="http://2.bp.blogspot.com/-9E7v6qpQr4Y/UyHiinS7XCI/AAAAAAAAAAM/XWbt2qvw1is/s1600/SCH_5002_V00_NUAC-Keystone.png " style="width: 700px;"/></p>
+<p style="text-align:center;"><img src="img/SCH_5002_V00_NUAC-Keystone.png " style="width: 700px;"/></p>
 
 ---
 #Openstack
 ##Keystone - Backend
 
-Les différentes partie de keystone peuvent s'appuyer sur différents backend :
+Les différentes parties de keystones peuvent s'appuyer sur différents backend :
 
-<p style="text-align:center;"><img src="http://allthingsopendotcom.files.wordpress.com/2014/07/keystone.png" style="width: 700px;"/></p>
+<p style="text-align:center;"><img src="img/keystone.png" style="width: 700px;"/></p>
 
 ---
 #Openstack
@@ -1156,7 +1269,7 @@ Glance écoute sur le port 9292, comme nous stipulé dans le catalogue de servic
 #Openstack
 ##Glance
 
-<p style="text-align:center;"><img src="http://4.bp.blogspot.com/-8BGR7XSvuSw/VEr6NqccUKI/AAAAAAAAAGc/PP4yLwUYzpI/s1600/glance.png" style="width: 300px;"/></p>
+<p style="text-align:center;"><img src="img/glance.png" style="width: 300px;"/></p>
 
 - glance API : 
     - expose l'API;
@@ -1236,7 +1349,7 @@ Comme tous les composants Opensatck, nova expose une API REST :
 #Openstack
 ##Nova - Architecture physique classique
 
-<p style="text-align:center;"><img src="http://www.thoughtsoncloud.com/wp-content/uploads/2014/08/Basic-architecture-with-OpenStack-networking.png" style="width: 500px;"/></p>
+<p style="text-align:center;"><img src="img/Basic-architecture-with-OpenStack-networking.png" style="width: 500px;"/></p>
 
 - Tous les services nova se retrouvent le controller node;
 - __SAUF__ nova-compute qui est sur les compute node, afin de piloter les VM pour le HOST sur lequel il se trouve;
@@ -1327,7 +1440,7 @@ Chaque nova-compute, sur chaque host, enregistre ses capacités (CPU, RAM,...) d
 nova-scheduler va utliser ces informations pour choisir le host/nova-compute qui hébergera la VM, via de phases :
 - le filtre : quels sont les host éligibles;
 - le poids : quel est le plus optimal et quels sont les hosts suivant en cas d'échec;
-<p style="text-align:center;"><img src="http://docs.openstack.org/kilo/config-reference/content/figures/4/a/a/common/figures/filteringWorkflow1.png" style="width: 400px;"/></p>
+<p style="text-align:center;"><img src="img/filteringWorkflow1.png" style="width: 400px;"/></p>
 
 ---
 #Openstack
@@ -1366,7 +1479,7 @@ Pour l'utilisateur, il existe des moyens de contraindre le scheduler si les filt
 #Openstack
 ##Nova - scheduler
 
-L'adminitrateur peut également partitionner ses hosts dans différents host-aggregates, et paramétrer les flavor pour qu'une VM qui utilise un flovor soit schédulée sur ses hosts.
+L'adminitrateur peut également partitionner ses hosts dans différents host-aggregates, et paramétrer les flavor pour qu'une VM qui utilise un flavor soit schédulée sur ses hosts.
 
 Par exemple : 
 - tous les host qui ont des diques ssd sont regroupés dans le host-aggregate fast-io;
