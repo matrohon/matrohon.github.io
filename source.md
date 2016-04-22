@@ -369,6 +369,8 @@ count: false
 mat      17815  1.7  0.2 706368 48772 pts/5    Sl+  15:23   0:17 qemu-system-x86_64 -enable-kvm /tmp/img.qcow2
 ```
 
+Sans ça, il faudra se contenter d'émulation sans accélération : qemu;
+
 ---
 #Virtualisation
 ##Créer ses VMs
@@ -412,7 +414,7 @@ Plusieurs logiciels permettent de gérer correctement les VMs :
 #Virtualisation
 ##Libvirt
 
-Plusieurs hyperviseurs existent sur le marché. Il peut donc être utile d'avoir un API commune pour abstraire les fonctions de ces hyperviseurs;
+Plusieurs hyperviseurs existent sur le marché. Il peut donc être utile d'avoir __une API__ commune pour abstraire les fonctions de ces hyperviseurs;
 
 C'est le rôle de [Libvirt](https://libvirt.org/) dont l'API permet de  :
 - gérer les VMs (domain dans le context libvirt)
@@ -420,9 +422,10 @@ C'est le rôle de [Libvirt](https://libvirt.org/) dont l'API permet de  :
     - l'environnement réseau (NAT/Bridge, etc...)
     - l'environnement de stockage sur le host
     - ...
-Libvirt supporte plusieurs hyperviseurs (Qemu/KVM, Xen, LXC) et offre une interface d'accès à distance à l'hyperviseur;
 
-Deux outils peuvent notamment être utiliser pour piloter libvirt :
+Libvirt supporte __plusieurs hyperviseurs__ (Qemu/KVM, Xen, LXC) et offre une __interface d'accès à distance__ à l'hyperviseur;
+
+Deux outils peuvent notamment être utilisés pour piloter libvirt :
 - virsh : interface libvirt en ligne de comande fournie avec libvirt;
 - virt-manager : interface graphique;
 
@@ -439,8 +442,8 @@ Démo Virt-manager/libvirt
 ##Cas d'usage des VMs locales
 On peut rapidement créer une VM pour tester une nouvelle application sans compromettre l'hote. C'est très utile dans plusieurs cas :
 - faire tourner des services linux sous Windows/Mac;
-- installer des logiciels suspects;
-- tester des applications sans compromettre son environnement;
+- installer des __logiciels suspects__;
+- __tester__ des applications sans compromettre son environnement;
 
 Les vendeurs d'applications proposent souvent de tester leurs applicatif en proposant des VMs;
 
@@ -448,8 +451,8 @@ Pour cela ils fournissent :
 - les disques des VMs nécéssaires;
 - un fichier descriptif de l'environnement nécéssaire pour chaque VM (ram/cpu etc..);
 
-Des outils et formant propsent de déployer des VMs à partir de ce genre de resources :
-- Vagrant Files (VirtualBox, voir libvirt avec plugin)
+Des outils et formant proposent de déployer des VMs à partir de ce genre de resources :
+- __Vagrant__ Files (VirtualBox, voir libvirt avec plugin)
 - OVA/OVF format pour VMWare
 - XML files pour libvirt;
 
@@ -498,13 +501,13 @@ Formatting 'apache.qcow2', fmt=qcow2 size=10737418240 backing_file=debian-8.3.0.
 ---
 #Virtualisation
 
-La viryualisation nous permet donc : 
+La viryualisation nous permet donc :
 - d'optimser les resources dans le Datacenter;
 - tout en gardant :
     - de la performance;
     - de l'isolation et donc de la sécurité;
 
-En ajoutant une couche d'API pour fournir ses resources _à la demande__ et un manager pour  __ochestrer__ leur allocation, on obtient un Cloud IaaS.
+En ajoutant une couche d'API pour fournir ses resources _à la demande__ et un manager pour  __orchestrer__ leur allocation, on obtient un Cloud IaaS.
 
 ---
 template: agenda
@@ -517,7 +520,7 @@ name: openstack
 
 A la fin des années 2010, Les services IT s'approprient l'utilisation du cloud computing pour optimiser leur resources.
 
-VMWare est le plus produit le plus mature et remporte donc un grand succès!
+VMWare est le produit le plus mature et remporte donc un grand succès!
 
 De plus gros acteurs habitués des outils Opensource s'orientent vers des technologies plus ouvertes :
 - Amazon -> Xen;
@@ -549,7 +552,7 @@ Beaucoup de déploiements de cloud IaaS s'orientent vers VMWare VCenter qui mono
 __Une alternative Opensource est plus que nécéssaire pour concurrencer VMWare et AWS EC2__.
 
 La Nasa lance donc un nouveau cloud manager opensource, plus flexible, appélé __Nova__. __Rackspace__, un gros acteur de l'hébergement aux USA se joint à l'éffort pour créer Openstack.
-Très vite, il est décidé d'héberger le projet dans une fondation, afin d'en assurer l'__indépendance__, et de __fédérer__ le plus d'entreprise.
+Très vite, il est décidé d'héberger le projet dans une fondation, afin d'en assurer l'__indépendance__, et de __fédérer__ le plus d'entreprises possible.
 
 La __fondation Openstack__ est alors créée et l'engouement est rapide.
 
@@ -581,7 +584,6 @@ Pour les utilisateurs de Clouds, Openstack permet de changer de provider de clou
 - [4 open](https://wiki.openstack.org/wiki/Open) :
     - Open Source : no Open Core; no entreprise edition.
     - Open Design : Design Summit tous les 6 mois;
-
     - Open Development : public code reviews, public roadmaps;
     - Open Community : meritocracy, élections des Leader par les developpeurs;
 - faire vivre la communaté; (communication)
@@ -602,7 +604,7 @@ Pour les utilisateurs de Clouds, Openstack permet de changer de provider de clou
     - Individual Directors élus par les membres individuels
 - Technical committee
     - membres élus par les développeurs
-    - gère la cohérence technique d'Openstack 
+    - gère la cohérence technique d'Openstack
 - User committee
     - membres individuels élus
     - representent les utilisateurs
@@ -627,9 +629,9 @@ source : [activity.openstack.org](http://activity.openstack.org/dash/browser/)
     - pour une meilleur maintenabilité;
     - pour une facilité d'adoption pour les newcomers;
 - avec un grande couverture de tests unitaires et fonctionnels;
+- le code doit être approuvé par de "core dev" pour merger;
 - sous licence Apache 2.0
     - modifiable et redistribuable;
-
 
 ---
 #Openstack
@@ -645,6 +647,7 @@ source : [activity.openstack.org](http://activity.openstack.org/dash/browser/)
 - IRC : un chan par projet;
 - réunion hebdo par projet et par sous-projet;
 - ask.openstack.org;
+
 ---
 #Openstack
 ##Mutliples composants
