@@ -501,13 +501,13 @@ Formatting 'apache.qcow2', fmt=qcow2 size=10737418240 backing_file=debian-8.3.0.
 ---
 #Virtualisation
 
-La viryualisation nous permet donc :
+La virtualisation nous permet donc :
 - d'optimser les resources dans le Datacenter;
 - tout en gardant :
     - de la performance;
     - de l'isolation et donc de la sécurité;
 
-En ajoutant une couche d'API pour fournir ses resources _à la demande__ et un manager pour  __orchestrer__ leur allocation, on obtient un Cloud IaaS.
+En ajoutant une couche d'API pour fournir ses resources __à la demande__ et un manager pour  __orchestrer__ leur allocation, on obtient un Cloud IaaS.
 
 ---
 template: agenda
