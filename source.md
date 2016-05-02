@@ -679,15 +679,11 @@ Chaque composant va fournir :
 ---
 #Openstack
 ##Mutliples composants
-Chaque composant utilise le framework python Web Server Gateway Interface ([WSGI](http://wsgi.readthedocs.org/en/latest/)), configuré via la lib paste.deploy. Cette configuration est accessible via le fichier /etc/composant/*-paste.ini.
-
-Beaucoup de composants vont avoir le même genre de tache effectuer (gestion du fichier de config, gestion des log etc....). Pour factoriser ce travail, un ensemble de librairie sont proposées dans le projet transverse Openstack oslo.
-
-De même afin d'éviter des problèe d'incompatibilité de dépendances entre les projets Openstack, un pojet transverse appelé "requirements" à été créé. Lorqu'un projet veut utiliser/modifier une dépendance envers une librairy, il le fera via ce projet.
-
-Chaque composant peut gérér l'accès à ces API en fonction de l'utilisateur et de son rôle. Il le fait via son fichier /etc/composant/policy.json
-
-Enfin, chaque composant fournit un client CLI qui facilite l'utilisation de l'API REST via la ligne de commande.
+- __WSGI__ : Chaque composant utilise le framework python Web Server Gateway Interface ([WSGI](http://wsgi.readthedocs.org/en/latest/)), configuré via la lib paste.deploy. Cette configuration est accessible via le fichier /etc/composant/*-paste.ini.
+- __Oslo__ : Beaucoup de composants vont avoir le même genre de tache à effectuer (gestion du fichier de config, gestion des log etc....). Pour factoriser ce travail, un ensemble de librairie sont proposées dans le projet transverse Openstack oslo.
+- __requirements__ : De même afin d'éviter des problème d'incompatibilité de dépendances entre les projets Openstack, un pojet transverse appelé "requirements" à été créé. Lorqu'un projet veut utiliser/modifier une dépendance envers une librairy, il le fera via ce projet.
+- __Policy__ : Chaque composant peut gérér l'accès à ces API en fonction de l'utilisateur et de son rôle. Il le fait via son fichier /etc/composant/policy.json
+- __Client__ :Enfin, chaque composant fournit un client CLI qui facilite l'utilisation de l'API REST via la ligne de commande.
 
 ---
 #Openstack
@@ -1096,7 +1092,6 @@ Je peux utiliser le token aa521d73f8654911a181b964b01892f4 pour faire des requet
 ---
 #Openstack
 ##Keystone - Résumé
-http://lists.openstack.org/pipermail/openstack-dev/2016-April/091754.html
 <p style="text-align:center;"><img src="img/SCH_5002_V00_NUAC-Keystone.png " style="width: 700px;"/></p>
 
 ---
@@ -1778,11 +1773,11 @@ Si l'image de la VM n'inclue pas cloud-init, il est toujours possible d'y inject
 #Openstack
 ##Nova - Démo
 
-Revoyons tous ça lors d'une démo avec le web UI d'horizon et profitons-en pour voir d'autres options de gestion de VM offertes par nova :
-- nova pause/unpause VM;
-- nova suspend/resume VM;
-- nova shelve/unshelve VM;
-- nova snapshot;
+Revoyons tout ça lors d'une démo avec le web UI d'horizon et profitons-en pour voir d'autres options de gestion de VMs offertes par nova :
+- nova pause/unpause VM; stoppe la VM en gelant la RAM;
+- nova suspend/resume VM; stoppe la VM en envoyant un signal suspend (ACPI);
+- nova shelve/unshelve VM; arrete la VM mais la laisse dans la liste des VMs;
+- nova snapshot; fait un backup de la VM comme une nouvelle image dans Glance;
 
 ---
 #Openstack
@@ -1790,7 +1785,58 @@ Revoyons tous ça lors d'une démo avec le web UI d'horizon et profitons-en pour
 
 Etudions ce qu'il c'est passé sur le compute-node hébergeant la VM :
 
+```sh
+*$ ps aux | grep kvm
+libvirt+ .... qemu-system-x86_64 -enable-kvm -name instance-00000001 .... \
+-m 512 -smp 1,sockets=1,cores=1,threads=1 ... \
+-kernel /opt/stack/data/nova/instances/c6e331ce-6c94-48dc-8fc6-47e6f314f9e1/kernel \
+-initrd /opt/stack/data/nova/instances/c6e331ce-6c94-48dc-8fc6-47e6f314f9e1/ramdisk \
+-drive file=/opt/stack/data/nova/instances/c6e331ce-6c94-48dc-8fc6-47e6f314f9e1/disk,if=none,id=drive-virtio-disk0,format=qcow2,cache=none
+...
+```
 
+la VM a donc :
+- été démarrée par __libvirt__;
+- tirée partie des __optimisations CPU via kvm__;
+- utilisée un format kernel/initrd/rootfs de l'image choisie (__glance ami__);
+- utilisée de la __paravirtualisation__ (virtio);
+- utilisée du __Copy-On-Write__ (qcow2);
+
+---
+#Openstack
+##Nova - Démo
+
+Regardons de plus près l'image disque de la VM :
+```sh
+*$ qemu-img info /opt/stack/data/nova/instances/c6e331ce-6c94-48dc-8fc6-47e6f314f9e1/disk
+image: /opt/stack/data/nova/instances/c6e331ce-6c94-48dc-8fc6-47e6f314f9e1/disk
+file format: qcow2
+virtual size: 1.0G (1073741824 bytes)
+disk size: 10M
+cluster_size: 65536
+backing file: /opt/stack/data/nova/instances/_base/9def2bb793d7db7a2ba99a3e218d5f63394f9a82
+*$ qemu-img info /opt/stack/data/nova/instances/_base/9def2bb793d7db7a2ba99a3e218d5f63394f9a82 
+image: /opt/stack/data/nova/instances/_base/9def2bb793d7db7a2ba99a3e218d5f63394f9a82
+file format: raw
+virtual size: 24M (25165824 bytes)
+disk size: 24M
+```
+
+L'image de base de la VM, ainsi que les images kernel et initrd ont été téléchargées depuis le backend glance jusqu'au compute node. Il pourra s'en servir pour d'autres VMs;
+
+La taille du disque est de 1,0GB, comme spécifié dans le flavor utilisé;
+
+---
+#Openstack
+##Nova - Démo
+
+Cette démo manque de flexibilté sur deux aspets :
+- La gestion des disques de VM (block storage, volume) : 
+    - devrait pouvoir être gérée indépendemment des VMs;
+    - Amazon EBS;
+- La gestion des réseaux :
+    - devrait pour être plus fine et plus sécurisée;
+    - Amazon VPC;
 
 ---
 name: cinder
