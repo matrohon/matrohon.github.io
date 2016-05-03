@@ -655,7 +655,7 @@ source : [activity.openstack.org](http://activity.openstack.org/dash/browser/)
 Chaque composant va fournir :
 - un projet (dev/roadmap/git..) dédié (launchpad/git/gerrit);
 - des resources as a service(compute, storage, networks...);
-- une [API REST] (https://en.wikipedia.org/wiki/Representational_state_transfer) (souvent calquée et compatible EC2);
+- une [API REST](https://en.wikipedia.org/wiki/Representational_state_transfer) (souvent calquée et compatible EC2);
 - une base de données dédiée;
 - une architecture modulaire;
 - une implémentation opensource de référence :
@@ -934,9 +934,8 @@ Keystone est composé de plusieurs sous parties :
 
 La notion de __tenant__ (aussi appelé __projet__), __user__, __role__ :
 - un tenant ou projet, est une organisation à laquelle sont allouées des resources physiques du cloud (CPU/RAM/Disk...);
-- chaque utilisateur appartient à un tenant;
-- pour s'identifier sur un cloud openstack, un user utilisera le couple user;
-- un utilisateur peut appartenir à plusieurs tenant;
+- chaque utilisateur appartient à 0 ou plusieurs tenant;
+- pour utiliser un service Openstack, un utilisateur utilisera le couple user/tenant;
 - lorsqu'un utilisateur créé une resource (ex. une VM), il la créé pour le compte d'un tenant;
 - chaque utilisateur à un rôle dans chacun de ses tenants (admin/member...);
 
@@ -1842,6 +1841,120 @@ Cette démo manque de flexibilté sur deux aspets :
 name: cinder
 #Openstack
 ##Cinder
+
+Utiliser Cinder va nous permettre de gérer plus finement notre disque de VM, et de manière plus optimale;
+
+Cinder est une API pour gérer des espaces de stockage en mode __block__ pouvant être utilisés comme disque dur virtuel d'une VM;
+
+Historiquement, nova s'occupait de la gestion des volumes (nova-volume). Mais un service dédié géré par un équipe plus grande et spécialisé permettait d'utiliser plus de backend et d'avoir une API plus flexible;
+
+---
+#Openstack
+##Cinder
+
+Cinder écoute sur le port 8776 : 
+
+```sh
+*$ openstack endpoint show cinder
++--------------+----------------------------------------------+
+| Field        | Value                                        |
++--------------+----------------------------------------------+
+| adminurl     | http://192.168.100.140:8776/v1/$(tenant_id)s |
+| enabled      | True                                         |
+| id           | 71e4eb4267614905958f485b90174589             |
+| internalurl  | http://192.168.100.140:8776/v1/$(tenant_id)s |
+| publicurl    | http://192.168.100.140:8776/v1/$(tenant_id)s |
+| region       | RegionOne                                    |
+| service_id   | d57727aa111c4b0ca0fc5883bf1fe4db             |
+| service_name | cinder                                       |
+| service_type | volume                                       |
++--------------+----------------------------------------------+
+```
+
+---
+#openstack
+##Cinder Architecture
+
+<p style="text-align:center;"><img src="img/cinder.png" style="width: 250px;"/></p>
+
+- cinder API : gère les appels d'API;
+- cinder Volume : gère l'intéraction avec les backends;
+- cinder Scheduler : gère le choix du backend;
+
+---
+#Openstack
+##Cinder Volume/Backends
+
+Beaucoup de backends disponibles : 
+- RBD;
+- LVM;
+- GlusterFS;
+- NetApp;
+- Scality;
+- IBM;
+- Dell;
+- HP;
+- ...
+
+Avec différentes technologies : 
+- iSCSI;
+- FiberChannel;
+- Ceph;
+- GlusterFS;
+- NFS;
+
+---
+#Openstack
+##Cinder Scheduler
+
+Un cloud peut supporter plusieurs backends pour cinder;
+
+Le scheduler va choisir le backend qui hébergera le volume demandé;
+
+Le scheduler choisira en fonction :
+- du type de volume demandé;
+    - le type est créé dans cinder par l'administrateur; par exemple un type SSD-iSCSI pour tous les backends le supportant, et autre SSD-LVM;
+- de l'espace restant dans les différents backends
+
+---
+#Openstack
+##Cinder API
+
+Le moyen le plus simple de créer un volume est de le demander lors du boot en spécifiant une image de base :
+```sh
+*$ nova boot --flavor 2 \
+  --block-device source=image,id=484e05af-a14d-4567-812b-28122d1c2260,dest=volume,size=10,shutdown=preserve,bootindex=0 \
+    myInstanceFromVolume
+    +--------------------------------------+--------------------------------+
+    | Property                             | Value                          |
+    +--------------------------------------+--------------------------------+
+    | OS-EXT-STS:task_state                | scheduling                     |
+    | image                                | Attempt to boot from volume    |
+    |                                      | - no image supplied            |
+    | OS-EXT-STS:vm_state                  | building                       |
+    .........
+    +--------------------------------------+--------------------------------+
+```
+---
+#Openstack
+##Cinder API
+
+Le volume est alors créé dans Cinder
+
+```sh
+*$ cinder list
++-------------+--------+--------------+------+-------------+----------+-------------+
+|      ID     | Status | Display Name | Size | Volume Type | Bootable | Attached to |
++-------------+--------+--------------+------+-------------+----------+-------------+
+| 2fff50ab... | in-use |              |  10  |     None    |   true   | 2e65c854... |
++-------------+--------+--------------+------+-------------+----------+-------------+
+```
+---
+#Openstack
+##Cinder API
+
+On peut aussi créer le volume avant de l'utiliser en paramètre de la comande nova boot
+
 
 ---
 name: neutron
