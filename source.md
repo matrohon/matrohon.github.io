@@ -1872,7 +1872,7 @@ Cinder écoute sur le port 8776 :
 ```
 
 ---
-#openstack
+#Openstack
 ##Cinder Architecture
 
 <p style="text-align:center;"><img src="img/cinder.png" style="width: 250px;"/></p>
@@ -1923,8 +1923,8 @@ Le scheduler choisira en fonction :
 Le moyen le plus simple de créer un volume est de le demander lors du boot en spécifiant une image de base :
 ```sh
 *$ nova boot --flavor 2 \
-  --block-device source=image,id=484e05af-a14d-4567-812b-28122d1c2260,dest=volume,size=10,shutdown=preserve,bootindex=0 \
-    myInstanceFromVolume
+* --block-device source=image,id=484e05af-a14d-4567-812b-28122d1c2260,dest=volume,size=10,shutdown=preserve,bootindex=0 \
+* myInstanceFromVolume
     +--------------------------------------+--------------------------------+
     | Property                             | Value                          |
     +--------------------------------------+--------------------------------+
@@ -1954,8 +1954,32 @@ Le volume est alors créé dans Cinder
 ##Cinder API
 
 On peut aussi créer le volume avant de l'utiliser en paramètre de la comande nova boot
+```sh
+*$ cinder create --display-name my-volume 8
+*$ cinder list
++-----------------+-----------+-----------+------+-------------+----------+-------------+
+|       ID        |   Status  |    Name   | Size | Volume Type | Bootable | Attached to |
++-----------------+-----------+-----------+------+-------------+----------+-------------+
+| d620d971-b16... | available | my-volume |  8   |     None    |  false   |             |
++-----------------+-----------+-----------+------+-------------+----------+-------------+
+*$ nova boot --flavor 2 --image 98901246-af91-43d8-b5e6-a4506aa8f369 \
+* --block-device source=volume,id=d620d971-b160-4c4e-8652-2513d74e2080,dest=volume,shutdown=preserve \
+* myInstanceWithVolume
+```
+---
+#Openstack
+##Cinder API
 
+Autres commandes cinder :
 
+- Volume create/list/delete/show;
+- Snapshot create/list/delete/show;
+- Backups create/list/delete/show/restore; différent du snapshot car ne stocke que les données écrites, pas tout le disque
+- Volume attach/detach; utilisé par nova lors du boot;
+- Volume extend
+- Volume migrate
+- Transfer volume d'un tenant à l'autre
+ 
 ---
 name: neutron
 #Openstack
