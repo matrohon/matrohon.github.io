@@ -618,7 +618,7 @@ Openstack en chiffres :
 - +5000 contributeurs;
 - ~300 company ont proposés des commits;
 - ~1600 commit par mois;
-source : [stackalitics.com](www.stackalitics.com)
+source : [stackalitics.com](http://www.stackalitics.com)
 source : [activity.openstack.org](http://activity.openstack.org/dash/browser/)
 
 ---
@@ -1172,6 +1172,44 @@ Les demandes de démarrage de VMs dans Openstack passent par la mention de l'ima
 #Openstack
 ##Glance
 
+Glance écoute sur le port 9292, comme nous stipule dans le catalogue de service Keystone :
+
+```sh
+*$ openstack endpoint show glance
++--------------+----------------------------------+
+| Field        | Value                            |
++--------------+----------------------------------+
+| adminurl     | http://192.168.122.237:9292      |
+| enabled      | True                             |
+| id           | bec00829127843e6888b958e15945035 |
+| internalurl  | http://192.168.122.237:9292      |
+| publicurl    | http://192.168.122.237:9292      |
+| region       | RegionOne                        |
+| service_id   | 7129a41efc974c998464bc196f96e839 |
+| service_name | glance                           |
+| service_type | image                            |
++--------------+----------------------------------+
+```
+
+---
+#Openstack
+##Glance
+
+<p style="text-align:center;"><img src="img/glance.png" style="width: 300px;"/></p>
+
+- glance API : 
+    - expose l'API;
+    - valide le token avec keystone;
+    - traite les requètes relatives aux images;
+- glance Registry : gère les metadata des images;
+- glance database : contient les infos des images;
+- glance backend : espaces de stockage des images;
+
+
+---
+#Openstack
+##Glance
+
 Plusieurs propriétés peuvent être affectées à une image :
 - Type d'images;
 - Architecture;
@@ -1180,6 +1218,11 @@ Plusieurs propriétés peuvent être affectées à une image :
 - Espace dique minimum;
 - RAM minimum;
 - Publique ou privée;
+
+---
+#Openstack
+##Glance
+
 
 ```sh
 *$ glance image-list
@@ -1241,43 +1284,6 @@ On peut aussi utiliser des formats de Containers (disk+metadata) :
 
 ---
 #Openstack
-##Glance
-
-Glance écoute sur le port 9292, comme nous stipulé dans le catalogue de service Keystone :
-
-```sh
-*$ openstack endpoint show glance
-+--------------+----------------------------------+
-| Field        | Value                            |
-+--------------+----------------------------------+
-| adminurl     | http://192.168.122.237:9292      |
-| enabled      | True                             |
-| id           | bec00829127843e6888b958e15945035 |
-| internalurl  | http://192.168.122.237:9292      |
-| publicurl    | http://192.168.122.237:9292      |
-| region       | RegionOne                        |
-| service_id   | 7129a41efc974c998464bc196f96e839 |
-| service_name | glance                           |
-| service_type | image                            |
-+--------------+----------------------------------+
-```
-
----
-#Openstack
-##Glance
-
-<p style="text-align:center;"><img src="img/glance.png" style="width: 300px;"/></p>
-
-- glance API : 
-    - expose l'API;
-    - valide le token avec keystone;
-    - traite les requètes relatives aux images;
-- glance Registry : gère les metadata des images;
-- glance database : contient les infos des images;
-- glance backend : espaces de stockage des images;
-
----
-#Openstack
 ##Glance - API utilisateur
 
 Chaque utilisateur pourra gérer ses propres images via un ensemble d'API et de commandes CLI : 
@@ -1295,7 +1301,13 @@ Chaque utilisateur pourra gérer ses propres images via un ensemble d'API et de 
     image-upload        Upload data for a specific image.
 ```
 
-Souvent les cloud provider proposent des images publiques à leur tenants.
+---
+#Openstack
+##Glance
+
+Souvent les cloud provider proposent des images publiques à leur tenants;
+
+Plusieurs images utilisable dans glance sont référencées dans la [documentation openstack](http://docs.openstack.org/image-guide/obtain-images.html)
 
 ---
 template: agenda
@@ -1372,7 +1384,7 @@ Cepandant d'autres backend existent pour gérer les VM (ou container!) :
 
 Comme on l'a vu lors de la démo, avant de booter une VM, il faut choisir un flavor;
 
-Ces flavor caractérise une VM en spécifiant, par falvor :
+Ces flavor caractérisent une VM en spécifiant, par flavor :
 - la quantité de RAM;
 - le nombre de vCPU;
 - la taille du disque;
@@ -1434,7 +1446,7 @@ C'est le role de nova-scheduler;
 
 Chaque nova-compute, sur chaque host, enregistre ses capacités (CPU, RAM,...) dans la base de données nova;
 
-nova-scheduler va utliser ces informations pour choisir le host/nova-compute qui hébergera la VM, via de phases :
+nova-scheduler va utiliser ces informations pour choisir le host/nova-compute qui hébergera la VM, via de phases :
 - le filtre : quels sont les host éligibles;
 - le poids : quel est le plus optimal et quels sont les hosts suivant en cas d'échec;
 <p style="text-align:center;"><img src="img/filteringWorkflow1.png" style="width: 400px;"/></p>
@@ -1479,7 +1491,7 @@ Pour l'utilisateur, il existe des moyens de contraindre le scheduler si les filt
 L'adminitrateur peut également partitionner ses hosts dans différents host-aggregates, et paramétrer les flavor pour qu'une VM qui utilise un flavor soit schédulée sur ses hosts.
 
 Par exemple : 
-- tous les host qui ont des diques ssd sont regroupés dans le host-aggregate fast-io;
+- tous les host qui ont des disques ssd sont regroupés dans le host-aggregate fast-io;
 - l'admin créé un flavor ssd;
 - dès qu'on utilisera le flavor ssd, le scheduler bootera la VM sur l'un des host de fast-io;
 
@@ -1644,7 +1656,7 @@ car je n'ai pas __ouvert le flux__ icmp dans le security group de ma VM!
 
 Pour des raisons de sécurité et de facilité d'utilisation par des scripts, on privilègiera l'accès ssh par clé plutôt que par mot de passe.
 
-nova dispose d'un API pour gérer les clés d'accès au VMs : il s'agit des nova __keypairs__
+nova dispose d'une API pour gérer les clés d'accès au VMs : il s'agit des nova __keypairs__
 
 Avant de pouvoir attribuer une clé d'accès à une VM, il faut d'abord la générer :
 
@@ -1674,13 +1686,13 @@ Mais cela a des inconvénients, car en cas de rebuild de la VM, ce fichier sera 
 #Openstack
 ##Nova - keypairs
 
-Il conviendra donc de creer la keypair avant de booter la VM : 
+Il conviendra donc de créer la keypair avant de booter la VM : 
 
 ```sh
 *$ nova boot --flavor 1 --image cirros-0.3.4-x86_64-uec --key-name cloud vm1
 ```
 
-Une fois qu'on a attribué une floating-IP à la VM et que la VM est placé dans un security-group qui authorise l'accès ssh, on peut s'y connecter de l'exterieur via le certificat : 
+Une fois qu'on a attribué une floating-IP à la VM et que la VM est placée dans un security-group qui authorise l'accès ssh, on peut s'y connecter de l'exterieur via le certificat : 
 
 ```sh
  *$ ssh -i cloud.key cirros@172.24.4.1
@@ -1713,7 +1725,7 @@ Accès par le réseau :
 ```
 
 Accès par configdrive :
-- un disque iso provisionner par nova est attaché à la VM au boot;
+- un disque iso provisionné par nova est attaché à la VM au boot;
 - la VM monte se fichier et y lit les infos;
 - peut être utile si la VM n'a pas de dhcp, donc pas de réseau;
 - il faut spécifier l'utilisation du configdrive lors du boot de la VM : 
@@ -1738,7 +1750,7 @@ user-data/
 #Openstack
 ##Nova - configurer la VM
 
-Beaucoup de choses peuvent être paramétrée par l'utilisateur gràce à la section user-data de [cloud-init](https://cloudinit.readthedocs.org/en/latest/topics/examples.html) :
+Beaucoup de choses peuvent être paramétrées par l'utilisateur gràce à la section user-data de [cloud-init](https://cloudinit.readthedocs.org/en/latest/topics/examples.html) :
 - installation de packages;
 - ajout d'utilisateurs;
 - modification de fichiers;
@@ -1836,6 +1848,11 @@ Cette démo manque de flexibilté sur deux aspets :
 - La gestion des réseaux :
     - devrait pour être plus fine et plus sécurisée;
     - Amazon VPC;
+
+---
+template: agenda
+
+###.right[Openstack - Cinder]
 
 ---
 name: cinder
