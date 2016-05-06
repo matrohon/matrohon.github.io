@@ -46,8 +46,8 @@ name: agenda
     1. [Keystone](#keystone)
     1. [Glance](#glance)
     1. [Nova](#nova)
-    1. Cinder
-    1. Neutron
+    1. [Cinder](#cinder)
+    1. [Neutron](#neutron)
     1. Heat
     1. Swift
     1. CI/CD Openstack
@@ -1863,7 +1863,7 @@ Utiliser Cinder va nous permettre de gérer plus finement notre disque de VM, et
 
 Cinder est une API pour gérer des espaces de stockage en mode __block__ pouvant être utilisés comme disque dur virtuel d'une VM;
 
-Historiquement, nova s'occupait de la gestion des volumes (nova-volume). Mais un service dédié géré par un équipe plus grande et spécialisé permettait d'utiliser plus de backend et d'avoir une API plus flexible;
+Historiquement, nova s'occupait de la gestion des volumes (nova-volume). Mais un service dédié géré par un équipe plus grande et spécialisée permettait d'utiliser plus de backend et d'avoir une API plus flexible;
 
 ---
 #Openstack
@@ -1996,16 +1996,231 @@ Autres commandes cinder :
 - Volume extend
 - Volume migrate
 - Transfer volume d'un tenant à l'autre
- 
+
+---
+template: agenda
+
+###.right[Openstack - Neutron]
+
 ---
 name: neutron
 #Openstack
 ##Neutron
 
+Regardons ce qu'il c'est passé lors de la démo au niveau réseau :
+```sh
+*$ sudo brctl show
+bridge name bridge id       STP enabled interfaces
+br100       8000.525400fc3839   no      eth0
+                            vnet0
+```
+Toutes les VMs utilisent le même bridge :
+- problème de sécurité :
+    - des regles de sécurité sont provisionnées (mac-antispoofing, ip antispoofing, security group) mais
+    - des clients peuvent vouloir une segmentation plus forte de leurs flux réseaux 
+Toutes les VMs utilisent donc une interconnection niveau 2 :
+- problème de montée à l'échelle : les MACs des VMs doivent toutes être entrées dans le bridge (l2 learning), on peut vite atteindre les limites dans un gros cloud;
+
+---
+#Openstack
+##Neutron
+
+Adresse plusieurs problèmes : 
+- je ne peux pas configurer mon subnet;
+- je ne peux pas configurer mon domaine de routage;
+- je ne peux pas configurer de services réseaux avancés (LoadBalancing, VPN, Firewall);
+- le cloud admin ne peut pas utiliser les dernières technologies SDN (OVS, Openflow, Overlay, Controleur SDN Dédié...);
+
+Comme pour Cinder, un service Openstack dédié à la gestion réseau va être créé : Neutron
+- plus de flexibilité :
+    - sur la configuration du réseau pour l'utilisateur 
+    - sur les technologies pour le cloud administrateur
+- une équipe de développement dédiée;
+
+---
+#Openstack
+##Neutron
+
+Neutron écoute sur le port 9696 : 
+```sh
+$ openstack endpoint show neutron
++--------------+----------------------------------+
+| Field        | Value                            |
++--------------+----------------------------------+
+| adminurl     | http://192.168.122.140:9696/     |
+| enabled      | True                             |
+| id           | 364cadf230544526a6983730783fe367 |
+| internalurl  | http://192.168.122.140:9696/     |
+| publicurl    | http://192.168.122.140:9696/     |
+| region       | RegionOne                        |
+| service_id   | fb10362322304aa8a909b60285b35f54 |
+| service_name | neutron                          |
+| service_type | network                          |
++--------------+----------------------------------+
+```
+
+---
+#Openstack
+##Neutron - Architecture
+
+<p style="text-align:center;"><img src="img/neutron.png" style="width: 400px;"/></p>
+
+---
+#Openstack
+##Neutron - Architecture
+
+Plugin de réference : ML2 (Multiple Layer 2)
+- Deux technologies de référence pour l'agent niveau 2 (l2-agent):
+    - OpenVSwitch;
+    - Linux-brdige : comme pour nova-network;
+- Un agent niveau 3 (l3-agent) pour le routage :
+    - SNAT;
+    - DNAT (floating IP);
+- Un agent pour le dhcp (dhcp-agent);
+
+Les agents dhcp et l3 peuvent tirer partie des __"network namespace"__ linux afin de gérer l'overlapping d'adresses IP entres des subnets;
+
+---
+#Openstack
+##Neutron - Architecture
+
+<p style="text-align:center;"><img src="img/Basic-architecture-with-OpenStack-networking.png" style="width: 500px;"/></p>
+
+---
+#Openstack
+##Neutron - Architecture
+
+<p style="text-align:center;"><img src="img/neutron-design.png" style="width: 600px;"/></p>
+
+---
+#Openstack
+##Neutron
+
+De nombreux autres plugin peuvent être utilisés à la place de ML2 :
+- VMWare NSX;
+- Juniper Opencontrail;
+- Nokia NuageNetworks;
+- Midokura;
+- Plumgrid;
+- Calico;
+- Dragon-Flow;
+- ...
+---
+#Openstack
+##Neutron
+
+En général, ces implémentations alternatives n'utilisent que le serveur Neutron et ses API; Ils font ensuite appel à leur propre agent sur le compute node :
+<p style="text-align:center;"><img src="img/sdn-connections.png" style="width: 500px;"/></p>
+
+---
+#Openstack
+##Neutron - Overlay Networks
+
+Pour davantage de __flexibilité__ sur les plans d'adressage (potentiellement recouvrant) et de __sécurité__, on va cherher à __segmenter__ les flux pour chaque réseau créé dans Neutron;
+
+Dans le monde du réseau niveau 2, cette segmentation se fait naturellement via des __VLAN__;
+
+Or les VLAN posent deux problèmes majeurs :
+- leur __nombre est limité__ : 4096
+    - dans un grand cloud public, on peut facilement imaginer que le nombre de réseau neutron créé sera supérieur à 4096;
+- on peut difficilement paramétrer les équipements physques niveau 2 (Top Of Rack) pour qu'ils puissent accepter du traffic de tous les vlan :
+    - leur __mémoire interne n'est pas suffisante__ pour stocker l'ensemble des MAC potentielles;
+    - -> problème connu de __scalabilité des réseaux niveau 2__;
+    - il faudrait placer les VMs en fonction de la topologie réseau physique... c'est compliqué!
+
+---
+#Openstack
+##Neutron - Overlay Networks
+
+<p style="text-align:center;"><img src="img/net-fabric.png" style="width: 600px;"/></p>
+
+---
+#Openstack
+##Neutron - Overlay Networks
+
+Le problème peut se résoudre via l'utlisation de réseaux Overlay :
+- encapsulation du niveau 2 (ethernet) dans du niveau 3 (IP) __ETHoIP__;
+- possibilité d'utiliser un réseau physique qui route de l'IP et qui __scale__ (aussi bien qu'internet)
+- plusieurs protocoles disponibles : 
+    - VXLAN (Noyau Linux, OpenvSwicth)
+    - NVGRE (OpenVSwitch)
+    - STT (VMWare Nicira)
+    - Geneve (OpenVSwitch, Noyau Linux via LWTunnel)
+
+---
+#Openstack
+##Neutron - Overlay Networks - VXLAN
+
+VXLan semble être le plus utilisé : 
+
+<p style="text-align:center;"><img src="img/VXLAN-FF.jpg" style="width: 500px;"/></p>
+
+A chaque réseau Neutron va être attribué un __VNI__;
+
+Les VNI sont encodés sur 24 bits, on peut donc en créer __16 millions__ : c'est beaucoup mieux que les 4096 Vlan!
+
+---
+#Openstack
+##Neutron - Overlay Networks
+
+
+C'est l'hyperviseur, via le l2-agent, neutron qui se charge de l'encapsulation dans le bon reseau Overlay :
+
+<p style="text-align:center;"><img src="img/vxlan-img2.jpg" style="width: 500px;"/></p>
+
+Ainsi, on peut utiliser une fabric réseau : 
+- simple, avec peu de vlan, dont un pour transporter le trafic VXLAN;
+- donc scalable;
+- potentiellement en IP pur, avec les protocoles de HA adéquat (OSPF, ISIS...) au lieu de spanning tree (l2)...
+
+
+---
+#Openstack
+##Neutron - API
+
+- port create/update/list/show/delete
+    - le port créé peut être utilisé dans la commande boot de nova
+- network create/update/list/show/delete
+    - le réseau créé peut être utilisé dans la commande boot de nova
+
+Si on utilise neutron, nova doit spécifier un port ou un réseau pour chacune des cartes réseaux de la VM qu'il boot.
+
+- subnet create/update/list/show/delete
+- router create/update/list/show/delete
+    - router-gateway-set : pour attacher le réseau externe
+    - router-interface-add : pour attacher des réseaux internes
+- security-group create/update/list/show/delete
+    - idem qu'avec nova, mais c'est neutron qui s'en occupe
+
+---
+#Openstack
+##Neutron
+
+Demo
+
+---
+#Openstack
+##Neutron - Flux réseaux
+
+<p style="text-align:center;"><img src="img/neutron-flows.jpg" style="width: 500px;"/></p>
+
+problème :
+- deux VMs doivent passer par le network node pour cmmuniquer au niveau IP (via un router)
+    - solution  __distributed routing__ (neutron DVR)
+    - distribue également les floating IP;
+    - ne marche pas pour le NAT à cause des flux de l'adresse publique du router qui devrait être partagée : rien n'assure que le flux retour reviennent sur le même compute-node
+- il n'y a qu'un seul router et en cas de crash du network node plus aucun traffic n'est envoyé vers l'extérieu : problème de __Haute Disponibilité__
+    - solution HA-router : on instancie __deux routeurs__ en actif-passif et on utilisie VRRP pour détecter la panne et basculer;
+
+---
+#Openstack
+##Neutron
+
+LBaaS, VPNaaS, FWaaS
+
 ---
 #Openstack
 ##Heat
-
 
 
 ---
