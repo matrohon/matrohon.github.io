@@ -48,7 +48,8 @@ name: agenda
     1. [Nova](#nova)
     1. [Cinder](#cinder)
     1. [Neutron](#neutron)
-    1. Heat
+    1. [Telemetry](#telemetry)
+    1. [Heat](#heat)
     1. Swift
     1. CI/CD Openstack
 
@@ -2240,8 +2241,14 @@ __Firewall as a Service__ :
 <p style="text-align:center;"><img src="img/FWaaS.jpg" style="width: 500px;"/></p>
 
 ---
+template: agenda
+
+###.right[Openstack - Telemetry]
+
+---
+name: telemetry
 #Openstack
-##Neutron - Services Avancés
+##Telemetry
 
 __VPN as a Service__ :
 - API pour gèrer des connexions IPSec vers les router neutron;
@@ -2250,16 +2257,111 @@ __VPN as a Service__ :
 
 <p style="text-align:center;"><img src="img/VPNaaS.png" style="width: 500px;"/></p>
 
+Telemetry écoute les appels d'API sur le port 8777;
+
 ---
+#Openstack
+##Telemetry
+
+Tous les services Openstack peuvent, si ils le souhaitent, reporter des données d'utilisation dans Ceilometer :
+
+<p style="text-align:center;"><img src="img/openstack_havana_conceptual_arch.png" style="width: 500px;"/></p>
+
+---
+#Openstack
+##Telemetry - API
+
+les principales API sont :
+- meter : show/list; voir la mesure d'une resource (ex. : le CPU utilisé par une VM);
+- samples : create/update/show/list/delete ; idem que meter mais dans une période définie;
+- alarm : create/update/show/list/delete ; créé une alarme et son comportement (log, POST http)
+
+La facturation peut ainsi s'appuyer sur les données remontée dans Ceilometer!
+
+---
+template: agenda
+
+###.right[Openstack - Heat]
+
+---
+name: heat
 #Openstack
 ##Heat
 
+Heat fourni la capacité à __déployer plusieurs resources Openstack__ via un seul appel API;
+
+Ces resources sont définies dans un __template__, au format HOT;
+
+Heat manipulera des "stack" correspondant à l'ensemble des resources définies dans le template;
+
+```sh
+*heat stack-create mystack -template-file mytemplate.yaml
++------------------+---------------+--------------------+----------------------+
+| id               | stack_name    | stack_status       | creation_time        |
++------------------+---------------+--------------------+----------------------+
+| 4c712026-dcd5... | mystack       | CREATE_IN_PROGRESS | 2013-04-03T23:22:08Z |
++------------------+---------------+--------------------+----------------------+
+```
+
+---
+#Openstack
+##Heat - Template
+
+L'ensemble des resources précédemment utilisées dans les services Openstack son manipulables dans un template Heat :
+- VM nova : OS::Nova::Server;
+- réseau neutron : OS::Neutron::Network;
+- alarme ceilometer : OS::Ceilometer::Alarm;
+- ...
+
+Un template peut également :
+- prendre/nécéssiter des parametre en entrées;
+- enregistrer des données en sortie;
+
+---
+#Openstack
+##Heat - Exemple
+
+Pour déployer une VM et lorsque neutron est utilisé dans le cloud, nous avons vu qu'il faut préalablement créer un réseau et un subnet;
+
+Il faut donc faire plusieurs appels d'API pour créer ses resources, avant de booter la VM;
+
+Voyons le template Heat qui nous permettrait de faire tout ça via __un seul appel API à heat__ : [template](img/servers_in_new_neutron_net.yaml)
+
+---
+#Openstack
+##Heat - Auto Scaling
+
+On peut également gérer l'autoscaling de ses applications déployées dans des VMs via :
+- __l'autoscaling group__ : réference un template Heat à utiliser pour la demande de scale-up/down;
+- __les scaling policy__ : 
+    - gère la manipulation du template de l'autosacling group;
+    - génère une URL pour déclencher l'ordre de scale;
+
+exemple : [template](img/asg_of_stacks.yaml)
+
+---
+#Openstack
+##Heat + Telemetry
+
+En combinant :
+- les autoscaling group de Heat
+- les alarmes de Telemetry 
+- le server cloud-init de nova
+- les images de base de glance
+
+On peut déployer une application depuis un OS basic et le faire scaler au besoin;
+
+Exemple avec [Wordpress](img/autscaling.yaml)
+
+---
+#Openstack
+##Heat + Telemetry
+
+De la même manière, on peut déployer une stack d'un cloud à l'autre :
+<p style="text-align:center;"><img src="img/Multi-Cloud_Priv-Pub3.png" style="width: 700px;"/></p>
 
 ---
 #Openstack
 ##Swift
-
-
-
 
 
