@@ -2202,21 +2202,53 @@ Demo
 #Openstack
 ##Neutron - Flux réseaux
 
-<p style="text-align:center;"><img src="img/neutron-flows.jpg" style="width: 500px;"/></p>
-
-problème :
-- deux VMs doivent passer par le network node pour cmmuniquer au niveau IP (via un router)
-    - solution  __distributed routing__ (neutron DVR)
-    - distribue également les floating IP;
-    - ne marche pas pour le NAT à cause des flux de l'adresse publique du router qui devrait être partagée : rien n'assure que le flux retour reviennent sur le même compute-node
-- il n'y a qu'un seul router et en cas de crash du network node plus aucun traffic n'est envoyé vers l'extérieu : problème de __Haute Disponibilité__
-    - solution HA-router : on instancie __deux routeurs__ en actif-passif et on utilisie VRRP pour détecter la panne et basculer;
+<p style="text-align:center;"><img src="img/neutron-router.png" style="width: 700px;"/></p>
 
 ---
 #Openstack
-##Neutron
+##Neutron - Flux réseaux
 
-LBaaS, VPNaaS, FWaaS
+Problèmes :
+- deux VMs doivent passer par le network node pour cmmuniquer au niveau IP (via un router)
+    - solution  __distributed routing__ (neutron DVR)
+    - distribue également les floating IP;
+    - ne marche pas pour le SNAT à cause de l'adresse publique du router qui devraient être partagée : rien n'assure que le flux retour reviennent sur le même compute-node
+- il n'y a qu'un seul router et en cas de crash du network node, il n'y a plus aucun traffic avec l'extérieur : problème de __Haute Disponibilité__
+    - solution HA-router : on instancie __deux routeurs__ en actif-passif et on utilise VRRP pour détecter la panne et basculer;
+
+---
+#Openstack
+##Neutron - Services Avancés
+
+__Load Balancer as a Service__ :
+- les Load balancer sont des composants indipensables pour monter à l'échelle de manière flexible;
+- API pour provisionner un load balancer
+- exemple de load balancer : HAProxy (implémentation de reférence), F5...
+
+<p style="text-align:center;"><img src="img/LBaaS.png" style="width: 500px;"/></p>
+
+---
+#Openstack
+##Neutron - Services Avancés
+
+__Firewall as a Service__ :
+- API pour provisionner des règles de firewalling sur le router;
+- reglès ordonnées d'ALLOW/DENY;
+- complémentaire des security group;
+- plusieurs implémentations disponibles : IPTables (référence), VArmor..
+
+<p style="text-align:center;"><img src="img/FWaaS.jpg" style="width: 500px;"/></p>
+
+---
+#Openstack
+##Neutron - Services Avancés
+
+__VPN as a Service__ :
+- API pour gèrer des connexions IPSec vers les router neutron;
+- Permet d'encrypter les connexions vers son could ou entre deux cloud;
+- plusieurs implémentations disponibles : Strongswan (référence), Cisco...
+
+<p style="text-align:center;"><img src="img/VPNaaS.png" style="width: 500px;"/></p>
 
 ---
 #Openstack
