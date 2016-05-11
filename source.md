@@ -2241,6 +2241,17 @@ __Firewall as a Service__ :
 <p style="text-align:center;"><img src="img/FWaaS.jpg" style="width: 500px;"/></p>
 
 ---
+#Openstack
+##Neutron - Services Avancés
+
+__VPN as a Service__ :
+- API pour gèrer des connexions IPSec vers les router neutron;
+- Permet d'encrypter les connexions vers son could ou entre deux cloud;
+- plusieurs implémentations disponibles : Strongswan (référence), Cisco...
+
+<p style="text-align:center;"><img src="img/VPNaaS.png" style="width: 500px;"/></p>
+
+---
 template: agenda
 
 ###.right[Openstack - Telemetry]
@@ -2250,16 +2261,18 @@ name: telemetry
 #Openstack
 ##Telemetry
 
-__VPN as a Service__ :
-- API pour gèrer des connexions IPSec vers les router neutron;
-- Permet d'encrypter les connexions vers son could ou entre deux cloud;
-- plusieurs implémentations disponibles : Strongswan (référence), Cisco...
+Telemetry est le projet Openstack qui gère la __supervision__ du datacenter virtuel;
 
-<p style="text-align:center;"><img src="img/VPNaaS.png" style="width: 500px;"/></p>
+Il est composé de trois sous projets :
 
+- __Ceilometer__ : collecte des données en base;
+- __Aodh__ : gestion des alarmes;
+- __Gnocchi__ : collecte des données et indexation dans une base de données temporelle;
+ 
 Telemetry écoute les appels d'API sur le port 8777;
 
 ---
+name: telemetry
 #Openstack
 ##Telemetry
 
@@ -2351,7 +2364,7 @@ En combinant :
 
 On peut déployer une application depuis un OS basic et le faire scaler au besoin;
 
-Exemple avec [Wordpress](img/autscaling.yaml)
+Exemple avec [Wordpress](img/autoscaling.yaml)
 
 ---
 #Openstack
