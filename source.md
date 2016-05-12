@@ -50,8 +50,7 @@ name: agenda
     1. [Neutron](#neutron)
     1. [Telemetry](#telemetry)
     1. [Heat](#heat)
-    1. Swift
-    1. CI/CD Openstack
+    1. [Autre usage d'IaaS](#autre)
 
 ---
 template: agenda
@@ -2374,7 +2373,123 @@ De la même manière, on peut déployer une stack d'un cloud à l'autre :
 <p style="text-align:center;"><img src="img/Multi-Cloud_Priv-Pub3.png" style="width: 700px;"/></p>
 
 ---
+template: agenda
+
+###.right[Autre usage d'IaaS]
+
+---
+name: autre
 #Openstack
-##Swift
+##Aute usage d'IaaS
+###Test
+
+Je développe une Application qui doit tourner dans plusieurs environnements différents:
+- OS : Ubuntu, Centos...
+- Framework : python2.7, python3...
+- Backend DB : Mysql, Postgres, RabbitMQ...
+- Backend MQ : RabbitMQ, ZMQ...
+- ...
+
+La flexibilité apportée part le IaaS permet de créer des environnements de tests à la demande;
+
+On va pouvoir facilement automatiser les tests lors du développement.
+
+---
+#Openstack
+##Autre usage d'IaaS
+###Test Openstack
+
+Openstack utilise cette flexibilité pour tester chaque patch proposé.
+
+Les outils utilisés sont :
+- gerrit : outils de vote sur les patchs;
+- Jenkins : orchestrateur des tests;
+- Cloud public : OVH, Rackspace pour lancer les VMs de test
+- Outils de tests :
+    - Devstack : outil de déploiement d'un openstack de test
+    - Tempest : tests fonctionnels;
+    - Rally : tests fonctionnels/charge;
+    - Grenade : Test d'upgrade;
+
+---
+#Openstack
+##Autre usage d'IaaS
+###Test Openstack - Gerrit changes
+
+<p style="text-align:center;"><img src="img/code_review.png" style="width: 600px;"/></p>
+
+---
+#Openstack
+##Autre usage d'IaaS
+###Test Openstack - jenkins
+
+Jenkins, un outils d'intégration continue capable d'orchestrer une série de tests en parallèle;
+
+Pour tester un patch, Openstack lancera __chaque test Jenkins dans une nouvelle VM__;
+
+Openstack gerera un ensemble de VMs disponibles pour les tests, et __jenkins votera dans gerrit__ sur le patch en fonction du résultat du test;
+
+---
+#Openstack
+##Autre usage d'IaaS
+###Test Openstack - jenkins
 
 
+<p style="text-align:center;"><img src="img/gerrit-jenkins.png" style="width: 700px;"/></p>
+
+---
+#Openstack
+##Autre usage d'IaaS
+###Virtual Network Function
+
+D'autres industries profite de cette "révolution de l'IT" pour se moderniser et se flexibiliser.
+
+C'est particulièrement vrai dans l'industrie des __Télécommunications__;
+
+Historiquement les services de télécommunication sont basés sur des __solutions physiques__ :
+- router;
+- firewall;
+- ...
+
+donc peut flexibles et longues à mettre en oeuvre; 
+
+Grace à l'IaaS, une fois virtualisés, ces services peuvent égalament entre rendus aux clients __à la demande__;
+
+Ces services spécifiquement orientés réseaux s'appellent des __VNFs__;
+
+---
+#Openstack
+##de l'IaaS au CaaS
+
+Comme on l'a vu, __les containers__ se diffèrent des VMs, en étant :
+- plus rapides;
+    - au boot;
+    - à l'excécution, car sans aucune de virtualisation;
+- moins isolés, et donc moins sécurisés;
+- plus liés à l'host sous-jacent en utilisant le même OS Linux;
+
+Pour des services pour lesquels la sécurité est moins importante les containers sont très intressants pour __optimiser davantage ses resources;
+
+---
+#Openstack
+##de l'IaaS au CaaS
+
+__Docker__ va rendre indépendant la couche HOST de la couche container;
+
+Chaque container docker se base sur une __image de base__ (Ubuntu, centos...) qui peut être différent de l'OS de l'HOST, comme les VMs qui se basent sur une image Glance indépendante de l'OS utilisé pour l'hyperviseur;
+
+Ainsi on peut utiliser le même container Docker sur différents HOST, seul le kernel sera partagé;
+
+Ses images de base sont inventorié dans un __HUB__ docker;
+
+
+---
+#Openstack
+##de l'IaaS au CaaS
+
+De la même façon que Openstack permet de gérer et d'orchestrer ses VMs, plusieurs solutions existent pour orchestrer ses containers docker :
+- Kubernetes (google)
+- Mesos (Apache, Twitter..)
+- Swarm (Docker Inc)
+
+On peut alors parler de __Container As A Service__;
