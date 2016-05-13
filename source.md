@@ -2475,7 +2475,7 @@ Comme on l'a vu, __les containers__ se diffèrent des VMs, en étant :
 - moins isolés, et donc moins sécurisés;
 - plus liés à l'host sous-jacent en utilisant le même OS Linux;
 
-Pour des services pour lesquels la sécurité est moins importante les containers sont très intressants pour __optimiser davantage ses resources;
+Pour des services pour lesquels la sécurité est moins importante, les containers sont très intressants pour __optimiser davantage ses resources__;
 
 ---
 #Openstack
@@ -2483,12 +2483,38 @@ Pour des services pour lesquels la sécurité est moins importante les container
 
 __Docker__ va rendre indépendant la couche HOST de la couche container;
 
-Chaque container docker se base sur une __image de base__ (Ubuntu, centos...) qui peut être différente de l'OS de l'HOST, comme les VMs qui se basent sur une image Glance indépendante de l'OS utilisé pour l'hyperviseur;
+Chaque container docker se base sur une __image de base__ (Ubuntu, centos...) qui peut être différente de l'OS de l'HOST (comme les VMs qui se basent sur une image Glance indépendante de l'OS utilisé pour l'hyperviseur);
+
+Depuis cette image de base, on ajoute le logciel que ce container instanciera.
+
+---
+#Openstack
+##de l'IaaS au CaaS
+
+Ainsi chaque container sera défine dans un docker file tel que :
+
+```sh
+*$ cat Dockerfile
+FROM ubuntu:trusty
+RUN apt-get install apache2
+EXPOSE 80
+```
+Puis on crée le container et on l'exécute
+```sh
+$ docker build -t apache
+$ docker run -d -p 80:80 apache
+```
+Je viens de lancer un container sans installer apache sur mon HOST, ni aucune des librairies dépendantes;
+
+---
+#Openstack
+##de l'IaaS au CaaS
+
+<p style="text-align:center;"><img src="img/docker.png" style="width: 300px;"/></p>
 
 Ainsi on peut utiliser le même container Docker sur différents HOST, seul le kernel sera partagé;
 
 Ses images de base sont inventoriées dans un __HUB__ docker;
-
 
 ---
 #Openstack
