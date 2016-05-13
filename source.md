@@ -2289,7 +2289,14 @@ les principales API sont :
 - alarm : create/update/show/list/delete ; créé une alarme et son comportement (log, POST http)
 
 La facturation peut ainsi s'appuyer sur les données remontée dans Ceilometer!
-
+```sh
+*$ ceilometer statistics --meter cpu_util
++--------+----------------+---------------+-----+-----+------+-------+------+--------
+| Period | Period Start   |Period End     | Max | Min | Avg  | Sum   | Count| Dura...
++--------+----------------+---------------+-----+-----+------+-------+------+--------
+| 0      | 2015-01-09T14: |2015-01-09T14:2| 9.44| 0.0 | 6.75 | 337.94| 50   | 2792...
++--------+----------------+---------------+-----+-----+------+-------+------+--------
+```
 ---
 template: agenda
 
@@ -2307,7 +2314,7 @@ Ces resources sont définies dans un __template__, au format HOT;
 Heat manipulera des "stack" correspondant à l'ensemble des resources définies dans le template;
 
 ```sh
-*heat stack-create mystack -template-file mytemplate.yaml
+*$ heat stack-create mystack -template-file mytemplate.yaml
 +------------------+---------------+--------------------+----------------------+
 | id               | stack_name    | stack_status       | creation_time        |
 +------------------+---------------+--------------------+----------------------+
@@ -2319,14 +2326,14 @@ Heat manipulera des "stack" correspondant à l'ensemble des resources définies 
 #Openstack
 ##Heat - Template
 
-L'ensemble des resources précédemment utilisées dans les services Openstack son manipulables dans un template Heat :
+L'__ensemble des resources__ précédemment utilisées dans les services Openstack sont manipulables dans un template Heat :
 - VM nova : OS::Nova::Server;
 - réseau neutron : OS::Neutron::Network;
 - alarme ceilometer : OS::Ceilometer::Alarm;
 - ...
 
 Un template peut également :
-- prendre/nécéssiter des parametre en entrées;
+- prendre/nécéssiter des paramètres en entrées;
 - enregistrer des données en sortie;
 
 ---
@@ -2476,11 +2483,11 @@ Pour des services pour lesquels la sécurité est moins importante les container
 
 __Docker__ va rendre indépendant la couche HOST de la couche container;
 
-Chaque container docker se base sur une __image de base__ (Ubuntu, centos...) qui peut être différent de l'OS de l'HOST, comme les VMs qui se basent sur une image Glance indépendante de l'OS utilisé pour l'hyperviseur;
+Chaque container docker se base sur une __image de base__ (Ubuntu, centos...) qui peut être différente de l'OS de l'HOST, comme les VMs qui se basent sur une image Glance indépendante de l'OS utilisé pour l'hyperviseur;
 
 Ainsi on peut utiliser le même container Docker sur différents HOST, seul le kernel sera partagé;
 
-Ses images de base sont inventorié dans un __HUB__ docker;
+Ses images de base sont inventoriées dans un __HUB__ docker;
 
 
 ---
