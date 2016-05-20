@@ -51,6 +51,7 @@ name: agenda
     1. [Telemetry](#telemetry)
     1. [Heat](#heat)
     1. [Autre usage d'IaaS](#autre)
+1. [TP](#tp)
 
 ---
 template: agenda
@@ -1563,7 +1564,7 @@ Ainsi, Openstack introduit le concept de floating IP :
 
 On va alors commencer par s'attribuer une floating-ip : 
 ```sh
-*$ nova floating-ip-create
+*$ nova floating-ip-create floating-ip-pool
 +----+------------+-----------+----------+--------+
 | Id | IP         | Server Id | Fixed IP | Pool   |
 +----+------------+-----------+----------+--------+
@@ -2526,3 +2527,178 @@ De la même façon que Openstack permet de gérer et d'orchestrer ses VMs, plusi
 - Swarm (Docker Inc)
 
 On peut alors parler de __Container As A Service__;
+
+---
+template: agenda
+
+###.right[TP]
+
+---
+name: tp
+#Openstack
+##TP
+###Déploiement
+
+1. se logguer dans la VM en ssh (debian/enssat)
+2. aller dans le fichier de conf de devstack :
+```sh
+$ cd /opt/stack/devstack
+$ nano local.conf
+```
+Quel composant manque-t-il?
+3. L'ajouter et lancer le déploiement d'Openstack
+```sh
+$ ./stack.sh
+```
+---
+#Openstack
+##TP
+###Creation d'une VM
+
+prerequis :
+
+- lancez la VM :
+```sh
+$ vm4 init
+```
+- configurez le forward des ports locaux vers la VM :
+    - 127.0.0.1:80 vers 80
+    - 127.0.0.1:6080 vers 6080
+    - le port ssh est déjà configuré sur le port 2222 
+- démarrez la VM dans VirtualBox;
+    - user : debian;
+    - password : enssat;
+---
+#Openstack
+##TP
+###Creation d'une VM
+
+- copiez les fichers /users/etc/tmp/openstack dans la VM
+
+```sh
+$ scp -p -P 2222 /users/etc/tmp/openstack/local.conf \
+/users/etc/tmp/openstack/local.sh \
+/users/etc/tmp/openstack/stack.sh \
+debian@127.0.0.1:/opt/stack/devstack
+```
+
+---
+#Openstack
+##TP
+###Creation d'une VM
+
+- connectez-vous à la VM depuis un terminal
+    - assurez-vous que les fichiers stack.sh et local.sh sont exécutables
+    - lancez le déploiment d'openstack
+
+```sh
+$ ssh -p 2222 debian@127.0.0.1
+enssat$ cd /opt/stack/devstack
+enssat$ ls -la stack.sh local.sh
+enssat$ ./stack.sh
+```
+
+si besoin, vous pouvez en profiter pour passer le clavier en français :
+```sh
+enssat$ dpkg-reconfigure keyboard-configuration
+enssat$ service keyboard-setup restart
+```
+
+---
+#Openstack
+##TP
+###Creation d'une VM avec Horizon
+
+une fois le script stack.sh terminé :
+- connectez-vous à horizon via l'[url](http://127.0.0.1/)
+    - user : demo
+    - password : enssat
+- vérifiez que vous utilisez bien le tenant "demo"
+- créez une première VM cirros;
+- faites en sorte de pouvoir pinger l'IP externe 10.0.2.65 depuis cette VM;
+- faites en sorte de pouvoir vous connecter en ssh à cette VM depuis la VM Virtualbox enssat;
+- faites en sorte de pouvoir vous connecter à une VM via une clé privée, depuis la VM virtualbox enssat;
+- faites en sorte qu'une nouvelle VM affiche le message "Hello Enssat" dans ses log de boot;
+
+- Applez-moi pour vérifier
+
+---
+#Openstack
+##TP
+###Utilisation des API
+
+- connectez-vous sur la VM enssat;
+- analysez et chargez le fichier openrc :
+```sh
+enssat$ cat /opt/stack/devstack/openrc
+enssat$ source /opt/stack/devstack/openrc
+```
+
+---
+#Openstack
+##TP
+###Utilisation des API
+
+
+- interrogez l'API de keystone pour obtenir un token, et le catalog des service openstack déployés :
+```sh
+curl -s -X POST $OS_AUTH_URL/tokens   -H "Content-Type: application/json"   -d \
+'{"auth": {
+  "tenantName": "'"$OS_TENANT_NAME"'",
+  "passwordCredentials": {
+    "username": "'"$OS_USERNAME"'",
+    "password": "'"$OS_PASSWORD"'"}
+  }
+}'   | python -m json.tool
+```
+
+---
+#Openstack
+##TP
+###Utilisation des API
+
+
+- A partir de la réponse de keystone, stockez votre token id et l'URL de nova dans des variable d'environnement :
+```sh
+enssat$ export OS_TOKEN=...
+enssat$ export NOVA_URL=...
+```
+- listez les flavors et les VM de votre tenant via :
+```sh
+enssat$ curl -s -H "X-Auth-Token: $OS_TOKEN" $NOVA_URL/flavors | python -m json.tool
+enssat$ curl -s -H "X-Auth-Token: $OS_TOKEN" $NOVA_URL/servers | python -m json.tool
+```
+
+---
+#Openstack
+##TP
+###Utilisation des API
+
+
+- expérimentez les clients en ligne de commande :
+```sh
+enssat$ nova list
+enssat$ nova flavor-list
+enssat$ neutron net-list
+enssat$ neutron subnet-list
+enssat$ neutron router-list
+enssat$ glance image-list
+```
+- écrivez un script bash permettant, via ces clients openstack, de déployer un VM à laquelle vous pouvez vous connecter via une clé privée, depuis la VM virtualbox enssat;
+
+- Applez-moi pour vérifier
+---
+#Openstack
+##TP
+###Orchestration
+
+- Détruisez toutes vos VMs
+
+- Créez un template Heat qui prend en paramètres le nom du réseau, l'image glance et le flavor pour créer une première VM;
+
+- Détruisez ce template;
+
+- Créez un template Heat avec les même paramètres plus le nom de la clé, mais avec 2 VMs dont l'une est accessible via une IP publique;
+
+- Détruisez l'ensemble de ses resource via une seul ligne de commande;
+
