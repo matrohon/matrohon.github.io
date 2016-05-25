@@ -2557,18 +2557,17 @@ $ ./stack.sh
 
 prerequis :
 
-- lancez la VM :
+- créez la VM :
 ```sh
 $ vm4 init
 ```
-- configurez le forward des ports locaux vers la VM :
-    - 127.0.0.1:80 vers 80
+- configurez le forward des ports locaux vers la VM dans VirtualBox/Reseau
+    - 127.0.0.1:8080 vers 80
     - 127.0.0.1:6080 vers 6080
-    - le port ssh est déjà configuré sur le port 2222 
+    - le port ssh est déjà configuré sur le port 2222
 - démarrez la VM dans VirtualBox;
-    - user : debian;
-    - password : enssat;
----
+
+--
 #Openstack
 ##TP
 ###Creation d'une VM
@@ -2588,6 +2587,8 @@ debian@127.0.0.1:/opt/stack/devstack
 ###Creation d'une VM
 
 - connectez-vous à la VM depuis un terminal
+    - user : debian;
+    - password : enssat;
     - assurez-vous que les fichiers stack.sh et local.sh sont exécutables
     - lancez le déploiment d'openstack
 
@@ -2610,7 +2611,7 @@ enssat$ service keyboard-setup restart
 ###Creation d'une VM avec Horizon
 
 une fois le script stack.sh terminé :
-- connectez-vous à horizon via l'[url](http://127.0.0.1/)
+- connectez-vous à horizon via l'[url](http://127.0.0.1:8080/)
     - user : demo
     - password : enssat
 - vérifiez que vous utilisez bien le tenant "demo"
@@ -2618,9 +2619,10 @@ une fois le script stack.sh terminé :
 - faites en sorte de pouvoir pinger l'IP externe 10.0.2.65 depuis cette VM;
 - faites en sorte de pouvoir vous connecter en ssh à cette VM depuis la VM Virtualbox enssat;
 - faites en sorte de pouvoir vous connecter à une VM via une clé privée, depuis la VM virtualbox enssat;
-- faites en sorte qu'une nouvelle VM affiche le message "Hello Enssat" dans ses log de boot;
 
-- Applez-moi pour vérifier
+- Appelez-moi pour vérifier;
+- Détruisez tous les composant précédemment créé;
+- Appelez-moi pour vérifier;
 
 ---
 #Openstack
@@ -2674,7 +2676,6 @@ enssat$ curl -s -H "X-Auth-Token: $OS_TOKEN" $NOVA_URL/servers | python -m json.
 ##TP
 ###Utilisation des API
 
-
 - expérimentez les clients en ligne de commande :
 ```sh
 enssat$ nova list
@@ -2686,18 +2687,19 @@ enssat$ glance image-list
 ```
 - écrivez un script bash permettant, via ces clients openstack, de déployer un VM à laquelle vous pouvez vous connecter via une clé privée, depuis la VM virtualbox enssat;
 
-- Applez-moi pour vérifier
+- Appelez-moi pour vérifier le script;
+- Détruisez toutes les resources créez par ces scripts
+- Appelez-moi pour vérifier;
+
 ---
 #Openstack
 ##TP
 ###Orchestration
 
-- Détruisez toutes vos VMs
-
-- Créez un template Heat qui prend en paramètres le nom du réseau, l'image glance et le flavor pour créer une première VM;
-
+- créez un réseau Openstack (en ligne de commande ou avec l'interface web)
+- Créez un template Heat qui prend en paramètres ce nom du réseau, l'image glance et le flavor pour créer une première VM;
+- Appelez-moi pour vérifier;
 - Détruisez ce template;
-
 - Créez un template Heat avec les même paramètres plus le nom de la clé, mais avec 2 VMs dont l'une est accessible via une IP publique;
 
 - Détruisez l'ensemble de ses resource via une seul ligne de commande;
