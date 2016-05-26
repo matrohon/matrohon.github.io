@@ -2537,27 +2537,11 @@ template: agenda
 name: tp
 #Openstack
 ##TP
-###Déploiement
-
-1. se logguer dans la VM en ssh (debian/enssat)
-2. aller dans le fichier de conf de devstack :
-```sh
-$ cd /opt/stack/devstack
-$ nano local.conf
-```
-Quel composant manque-t-il?
-3. L'ajouter et lancer le déploiement d'Openstack
-```sh
-$ ./stack.sh
-```
----
-#Openstack
-##TP
-###Creation d'une VM
+###Déploiment d'Openstack
 
 prerequis :
 
-- créez la VM :
+- créez la VM depuis un terminal :
 ```sh
 $ vm4 init
 ```
@@ -2567,10 +2551,10 @@ $ vm4 init
     - le port ssh est déjà configuré sur le port 2222
 - démarrez la VM dans VirtualBox;
 
---
+---
 #Openstack
 ##TP
-###Creation d'une VM
+###Déploiment d'Openstack
 
 - copiez les fichers /users/etc/tmp/openstack dans la VM
 
@@ -2584,7 +2568,7 @@ debian@127.0.0.1:/opt/stack/devstack
 ---
 #Openstack
 ##TP
-###Creation d'une VM
+###Déploiment d'Openstack
 
 - connectez-vous à la VM depuis un terminal
     - user : debian;
@@ -2702,5 +2686,5 @@ enssat$ glance image-list
 - Détruisez ce template;
 - Créez un template Heat avec les même paramètres plus le nom de la clé, mais avec 2 VMs dont l'une est accessible via une IP publique;
 
-- Détruisez l'ensemble de ses resource via une seul ligne de commande;
+- Détruisez l'ensemble de ses resources via une seule ligne de commande;
 
