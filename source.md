@@ -2616,12 +2616,12 @@ une fois le script stack.sh terminé :
     - password : enssat
 - vérifiez que vous utilisez bien le tenant "demo"
 - créez une première VM cirros;
-- faites en sorte de pouvoir pinger l'IP externe 10.0.2.65 depuis cette VM;
+- faites en sorte de pouvoir pinger l'IP externe 1.1.1.1 depuis cette VM;
 - faites en sorte de pouvoir vous connecter en ssh à cette VM depuis la VM Virtualbox enssat;
 - faites en sorte de pouvoir vous connecter à une VM via une clé privée, depuis la VM virtualbox enssat;
 
 - Appelez-moi pour vérifier;
-- Détruisez tous les composant précédemment créé;
+- Détruisez tous les composant précédemment créés;
 - Appelez-moi pour vérifier;
 
 ---
@@ -2660,17 +2660,17 @@ curl -s -X POST $OS_AUTH_URL/tokens   -H "Content-Type: application/json"   -d \
 ###Utilisation des API
 
 
-- A partir de la réponse de keystone, stockez votre token id et l'URL de nova dans des variable d'environnement :
+- A partir de la réponse de keystone, stockez votre token id et l'URL de nova dans des variables d'environnement :
 ```sh
 enssat$ export OS_TOKEN=...
 enssat$ export NOVA_URL=...
 ```
-- listez les flavors et les VM de votre tenant via :
+- listez les flavors de votre tenant via :
 ```sh
 enssat$ curl -s -H "X-Auth-Token: $OS_TOKEN" $NOVA_URL/flavors | python -m json.tool
-enssat$ curl -s -H "X-Auth-Token: $OS_TOKEN" $NOVA_URL/servers | python -m json.tool
 ```
-
+- Listez les réseaux de votre tenant avec curl;
+- Appelez moi pour vérifier;
 ---
 #Openstack
 ##TP
@@ -2686,9 +2686,9 @@ enssat$ neutron router-list
 enssat$ glance image-list
 ```
 - écrivez un script bash permettant, via ces clients openstack, de déployer un VM à laquelle vous pouvez vous connecter via une clé privée, depuis la VM virtualbox enssat;
-
+    - si les commandes neutron renvoient une erreur, appelez moi;
 - Appelez-moi pour vérifier le script;
-- Détruisez toutes les resources créez par ces scripts
+- Détruisez toutes les ressources créés par ces scripts;
 - Appelez-moi pour vérifier;
 
 ---
@@ -2697,7 +2697,7 @@ enssat$ glance image-list
 ###Orchestration
 
 - créez un réseau Openstack (en ligne de commande ou avec l'interface web)
-- Créez un template Heat qui prend en paramètres ce nom du réseau, l'image glance et le flavor pour créer une première VM;
+- Créez un template Heat qui prend en paramètres ce nom de réseau, l'image glance et le flavor pour créer une première VM;
 - Appelez-moi pour vérifier;
 - Détruisez ce template;
 - Créez un template Heat avec les même paramètres plus le nom de la clé, mais avec 2 VMs dont l'une est accessible via une IP publique;
